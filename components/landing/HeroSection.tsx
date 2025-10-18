@@ -1,45 +1,73 @@
 /**
  * Hero Section Component
  * Main landing page hero with title and CTA buttons
+ * Matches Figma design with gradient background and animations
  */
 
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui";
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-b from-primary-50 to-white py-20 md:py-32">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#fff4e6] via-[#fff9f3] to-white py-16 md:py-24 lg:py-32">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-4xl text-center">
-          {/* Main Heading */}
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 md:text-6xl">
-            Every Share is a <span className="text-primary">Second Chance</span>
-          </h1>
+          {/* Main Heading with Animation */}
+          <motion.h1
+            className="mb-6 text-4xl font-bold tracking-tight text-gray-900 md:text-5xl lg:text-6xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Find Your New Best Friend
+          </motion.h1>
 
-          {/* Subtitle */}
-          <p className="mb-8 text-lg text-gray-600 md:text-xl">
-            유기견과 함께하는 특별한 인생네컷 챌린지
-          </p>
+          {/* Subtitle with Delay */}
+          <motion.p
+            className="mb-8 text-lg text-gray-600 md:text-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Discover dogs in need of loving homes. Our global platform connects you with shelters
+            worldwide.
+          </motion.p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/challenge"
-              className="w-full rounded-lg bg-primary px-8 py-4 text-center font-semibold text-white shadow-lg transition-all hover:bg-primary-600 hover:shadow-xl sm:w-auto"
-            >
-              🎨 챌린지 시작하기
+          {/* CTA Buttons with Stagger */}
+          <motion.div
+            className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Link href="/challenge">
+              <Button variant="primary" size="lg" className="w-full sm:w-auto">
+                Start Your Search
+              </Button>
             </Link>
-            <Link
-              href="/dogs"
-              className="w-full rounded-lg border-2 border-gray-300 bg-white px-8 py-4 text-center font-semibold text-gray-700 transition-all hover:border-primary hover:text-primary sm:w-auto"
-            >
-              🐕 유기견 만나기
+            <Link href="/challenge">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                Learn More
+              </Button>
             </Link>
-          </div>
+          </motion.div>
 
-          {/* Placeholder for slideshow */}
-          <div className="mt-12 rounded-2xl bg-gray-100 p-8 shadow-inner">
-            <p className="text-gray-500">📸 슬라이드쇼 영역 (3초 자동 전환)</p>
-          </div>
+          {/* Hero Image Placeholder with Animation */}
+          <motion.div
+            className="mt-12 overflow-hidden rounded-3xl bg-gradient-to-br from-[#ffe5db] to-[#fff0ea] shadow-2xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <div className="aspect-video w-full bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+              <div className="flex h-full items-center justify-center text-gray-400">
+                <p className="text-lg">📸 Hero Image / Slideshow Area</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

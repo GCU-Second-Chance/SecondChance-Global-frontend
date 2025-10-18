@@ -1,29 +1,103 @@
 /**
  * Quick Stats Section Component
- * Displays key metrics (shares, adoptions, countries)
+ * Displays key metrics with countup animation
  */
 
-export default function QuickStats() {
-  // Mock data - will be replaced with real data later
-  const stats = [
-    { label: "총 공유 횟수", value: "15,234", icon: "📊" },
-    { label: "입양 성공", value: "127", icon: "❤️" },
-    { label: "참여 국가", value: "23", icon: "🌍" },
-  ];
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
+
+interface StatItem {
+  label: string;
+  value: number;
+  suffix: string;
+  icon: string;
+}
+
+const stats: StatItem[] = [
+  { label: "Total Shares", value: 15234, suffix: "", icon: "�" },
+  { label: "Successful Adoptions", value: 127, suffix: "", icon: "❤️" },
+  { label: "Countries Participating", value: 23, suffix: "", icon: "🌍" },
+];
+
+function CountUpAnimation({
+  end,
+  suffix,
+  duration = 2,
+}: {
+  end: number;
+  suffix: string;
+  duration?: number;
+}) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+
+      // Easing function (easeOutCubic)
+      const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+      const currentCount = Math.floor(end * easeOutCubic(progress));
+
+      setCount(currentCount);
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration, isInView]);
 
   return (
-    <section className="bg-white py-12">
+    <div ref={ref} className="text-4xl font-bold text-gray-900 md:text-5xl">
+      {count.toLocaleString()}
+      {suffix}
+    </div>
+  );
+}
+
+export default function QuickStats() {
+  return (
+    <section className="bg-gradient-to-b from-white to-[#fff9f3] py-16 md:py-20">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <motion.div
+          className="mb-12 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Our Impact</h2>
+          <p className="text-lg text-gray-600">Together, we&apos;re making a difference</p>
+        </motion.div>
+
+        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center rounded-xl bg-gradient-to-br from-gray-50 to-white p-8 shadow-sm transition-shadow hover:shadow-md"
+            <motion.div
+              key={stat.label}
+              className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm transition-all hover:shadow-xl"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              whileHover={{ y: -4 }}
             >
               <div className="mb-4 text-5xl">{stat.icon}</div>
-              <div className="mb-2 text-4xl font-bold text-primary">{stat.value}</div>
-              <div className="text-sm font-medium text-gray-600">{stat.label}</div>
-            </div>
+              <CountUpAnimation end={stat.value} suffix={stat.suffix} />
+              <div className="mt-2 text-sm text-gray-600">{stat.label}</div>
+            </motion.div>
           ))}
         </div>
       </div>
