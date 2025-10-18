@@ -4,9 +4,6 @@ import { GoogleAnalytics } from "@/lib/analytics";
 import { I18nProvider } from "@/lib/i18n";
 import { QueryProvider } from "@/lib/react-query";
 import "./globals.css";
-import { BottomNavigation } from "@/components/layout/BottomNavigation";
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,14 +31,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <GoogleAnalytics />
         <I18nProvider>
-          <QueryProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <main className="flex-1 pb-16 md:pb-0">{children}</main>
-              <Footer />
-              <BottomNavigation />
-            </div>
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </I18nProvider>
       </body>
     </html>
