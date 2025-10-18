@@ -1,0 +1,9 @@
+# Vercel Ignore
+node_modules
+.next
+out
+.env*.local
+.git
+.vscode
+*.log
+.DS_Store

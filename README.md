@@ -58,7 +58,32 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📜 Available Scripts
+## � Deployment
+
+This project is deployed on [Vercel](https://vercel.com).
+
+### Deploy to Vercel
+
+1. **Install Vercel CLI (optional)**
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy**
+   ```bash
+   vercel
+   ```
+
+3. **Configure Environment Variables in Vercel Dashboard**
+   - `NEXT_PUBLIC_API_URL` - Backend API URL
+   - `NEXT_PUBLIC_GA_MEASUREMENT_ID` - Google Analytics ID
+
+### Automatic Deployments
+
+- **Production**: Commits to `main` branch
+- **Preview**: Pull requests
+
+## �📜 Available Scripts
 
 ```bash
 npm run dev          # Start development server
