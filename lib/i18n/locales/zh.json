@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "SecondChance Global",
+    "loading": "加载中...",
+    "error": "错误",
+    "retry": "重试",
+    "cancel": "取消",
+    "confirm": "确认",
+    "close": "关闭",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "next": "下一步",
+    "previous": "上一步",
+    "back": "返回"
+  },
+  "landing": {
+    "hero": {
+      "title": "每次分享都是第二次机会",
+      "subtitle": "与救助犬一起创建特别的四格照片挑战",
+      "startChallenge": "开始挑战",
+      "viewDogs": "查看救助犬"
+    },
+    "stats": {
+      "totalShares": "总分享次数",
+      "adoptionSuccess": "成功领养",
+      "participatingCountries": "参与国家"
+    },
+    "howItWorks": {
+      "title": "使用方法",
+      "step1": {
+        "title": "参与挑战",
+        "description": "与救助犬一起制作四格照片"
+      },
+      "step2": {
+        "title": "社交媒体分享",
+        "description": "与朋友分享"
+      },
+      "step3": {
+        "title": "连接领养",
+        "description": "帮助它们找到永久的家"
+      }
+    },
+    "successStories": {
+      "title": "成功案例",
+      "viewMore": "查看更多故事"
+    },
+    "featuredDogs": {
+      "title": "紧急案例",
+      "urgent": "紧急",
+      "helpNow": "立即帮助"
+    }
+  },
+  "challenge": {
+    "step1": {
+      "title": "选择相框",
+      "description": "选择您喜欢的相框样式",
+      "useThisFrame": "使用这个相框"
+    },
+    "step2": {
+      "title": "选择您的伙伴",
+      "description": "遇见命运之犬",
+      "meetRandomDog": "遇见随机之犬",
+      "directSelect": "直接选择",
+      "viewOtherDog": "查看其他狗",
+      "selectThisDog": "选择这只狗",
+      "dogInfo": {
+        "name": "名字",
+        "age": "年龄",
+        "gender": "性别",
+        "breed": "品种",
+        "location": "位置",
+        "shelter": "收容所",
+        "contact": "联系方式"
+      }
+    },
+    "step3": {
+      "title": "添加照片",
+      "description": "上传或拍摄3张照片",
+      "slotStatus": "照片 {{current}}/{{total}}",
+      "takePhoto": "拍照",
+      "uploadPhoto": "选择文件",
+      "retake": "重新拍摄",
+      "reselect": "重新选择",
+      "adjustPosition": "调整位置",
+      "rotate": "旋转",
+      "zoom": "缩放"
+    },
+    "step4": {
+      "title": "完成！ 🎉",
+      "description": "与世界分享",
+      "download": "下载",
+      "share": "分享",
+      "shareStats": "这个挑战帮助{{name}}被{{count}}人看到！",
+      "createAnother": "与其他狗创建挑战"
+    },
+    "progress": {
+      "frameSelected": "相框已选",
+      "dogMatched": "狗已匹配",
+      "photosCompleted": "照片完成",
+      "resultGenerated": "结果已生成"
+    },
+    "validation": {
+      "selectFrame": "请选择相框",
+      "selectDog": "请选择狗",
+      "completePhotos": "请完成所有照片插槽",
+      "invalidFileType": "不支持的文件类型。请使用JPG、PNG或HEIC",
+      "fileTooLarge": "文件大小超过10MB限制"
+    }
+  },
+  "dog": {
+    "gender": {
+      "male": "公",
+      "female": "母"
+    },
+    "ageYears": "{{age}}岁",
+    "details": {
+      "description": "描述",
+      "personality": "性格",
+      "healthStatus": "健康状况",
+      "adoptionRequirements": "领养要求"
+    },
+    "actions": {
+      "adopt": "咨询领养",
+      "share": "分享这只狗",
+      "challenge": "创建挑战"
+    },
+    "fromChallenge": "来自挑战",
+    "qrScanned": "QR码已扫描"
+  },
+  "footer": {
+    "about": "关于",
+    "contact": "联系我们",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "followUs": "关注我们",
+    "copyright": "© 2025 SecondChance Global. All rights reserved."
+  }
+}

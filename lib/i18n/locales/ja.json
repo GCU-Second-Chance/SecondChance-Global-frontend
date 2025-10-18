@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "SecondChance Global",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "close": "閉じる",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "next": "次へ",
+    "previous": "前へ",
+    "back": "戻る"
+  },
+  "landing": {
+    "hero": {
+      "title": "すべてのシェアがセカンドチャンス",
+      "subtitle": "保護犬との特別な4コマ写真チャレンジ",
+      "startChallenge": "チャレンジを始める",
+      "viewDogs": "保護犬を見る"
+    },
+    "stats": {
+      "totalShares": "総シェア数",
+      "adoptionSuccess": "里親成功",
+      "participatingCountries": "参加国"
+    },
+    "howItWorks": {
+      "title": "使い方",
+      "step1": {
+        "title": "チャレンジに参加",
+        "description": "保護犬と一緒に4コマ写真を作成"
+      },
+      "step2": {
+        "title": "SNSでシェア",
+        "description": "友達にシェアしてください"
+      },
+      "step3": {
+        "title": "里親につなげる",
+        "description": "新しい家族に出会えるようサポート"
+      }
+    },
+    "successStories": {
+      "title": "成功事例",
+      "viewMore": "もっと見る"
+    },
+    "featuredDogs": {
+      "title": "緊急ケース",
+      "urgent": "緊急",
+      "helpNow": "今すぐ助ける"
+    }
+  },
+  "challenge": {
+    "step1": {
+      "title": "フレームを選択",
+      "description": "お好みのフレームスタイルを選んでください",
+      "useThisFrame": "このフレームを使う"
+    },
+    "step2": {
+      "title": "一緒に写る子を選択",
+      "description": "運命の子に出会いましょう",
+      "meetRandomDog": "運命の子に会う",
+      "directSelect": "直接選ぶ",
+      "viewOtherDog": "他の子を見る",
+      "selectThisDog": "この子と一緒に",
+      "dogInfo": {
+        "name": "名前",
+        "age": "年齢",
+        "gender": "性別",
+        "breed": "犬種",
+        "location": "場所",
+        "shelter": "保護施設",
+        "contact": "連絡先"
+      }
+    },
+    "step3": {
+      "title": "写真を追加",
+      "description": "3枚の写真をアップロードまたは撮影",
+      "slotStatus": "写真 {{current}}/{{total}}",
+      "takePhoto": "撮影する",
+      "uploadPhoto": "ファイルを選択",
+      "retake": "撮り直す",
+      "reselect": "選び直す",
+      "adjustPosition": "位置調整",
+      "rotate": "回転",
+      "zoom": "ズーム"
+    },
+    "step4": {
+      "title": "完成しました！ 🎉",
+      "description": "世界にシェアしましょう",
+      "download": "ダウンロード",
+      "share": "シェアする",
+      "shareStats": "このチャレンジで{{name}}が{{count}}人に届きました！",
+      "createAnother": "別の子とチャレンジ"
+    },
+    "progress": {
+      "frameSelected": "フレーム選択",
+      "dogMatched": "犬のマッチング",
+      "photosCompleted": "写真完了",
+      "resultGenerated": "結果生成"
+    },
+    "validation": {
+      "selectFrame": "フレームを選択してください",
+      "selectDog": "犬を選択してください",
+      "completePhotos": "すべての写真を入れてください",
+      "invalidFileType": "サポートされていないファイル形式です。JPG、PNG、HEICを使用してください",
+      "fileTooLarge": "ファイルサイズが10MBを超えています"
+    }
+  },
+  "dog": {
+    "gender": {
+      "male": "オス",
+      "female": "メス"
+    },
+    "ageYears": "{{age}}歳",
+    "details": {
+      "description": "説明",
+      "personality": "性格",
+      "healthStatus": "健康状態",
+      "adoptionRequirements": "里親条件"
+    },
+    "actions": {
+      "adopt": "里親を問い合わせる",
+      "share": "シェアする",
+      "challenge": "チャレンジを作成"
+    },
+    "fromChallenge": "チャレンジから来ました",
+    "qrScanned": "QRコードスキャン済み"
+  },
+  "footer": {
+    "about": "について",
+    "contact": "お問い合わせ",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "followUs": "フォロー",
+    "copyright": "© 2025 SecondChance Global. All rights reserved."
+  }
+}

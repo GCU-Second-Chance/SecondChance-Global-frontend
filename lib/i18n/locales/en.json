@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "SecondChance Global",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "next": "Next",
+    "previous": "Previous",
+    "back": "Back"
+  },
+  "landing": {
+    "hero": {
+      "title": "Every Share is a Second Chance",
+      "subtitle": "Create a special photo challenge with rescue dogs",
+      "startChallenge": "Start Challenge",
+      "viewDogs": "View Dogs"
+    },
+    "stats": {
+      "totalShares": "Total Shares",
+      "adoptionSuccess": "Successful Adoptions",
+      "participatingCountries": "Participating Countries"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "step1": {
+        "title": "Join the Challenge",
+        "description": "Create your photo frame with a rescue dog"
+      },
+      "step2": {
+        "title": "Share on Social Media",
+        "description": "Share your creation with friends"
+      },
+      "step3": {
+        "title": "Connect to Adoption",
+        "description": "Help them find their forever home"
+      }
+    },
+    "successStories": {
+      "title": "Success Stories",
+      "viewMore": "View More Stories"
+    },
+    "featuredDogs": {
+      "title": "Featured Dogs",
+      "urgent": "Urgent",
+      "helpNow": "Help Now"
+    }
+  },
+  "challenge": {
+    "step1": {
+      "title": "Choose Your Frame",
+      "description": "Select a photo frame style",
+      "useThisFrame": "Use This Frame"
+    },
+    "step2": {
+      "title": "Meet Your Companion",
+      "description": "Match with a rescue dog",
+      "meetRandomDog": "Meet a Random Dog",
+      "directSelect": "Choose Directly",
+      "viewOtherDog": "View Another Dog",
+      "selectThisDog": "Select This Dog",
+      "dogInfo": {
+        "name": "Name",
+        "age": "Age",
+        "gender": "Gender",
+        "breed": "Breed",
+        "location": "Location",
+        "shelter": "Shelter",
+        "contact": "Contact"
+      }
+    },
+    "step3": {
+      "title": "Add Your Photos",
+      "description": "Upload or take 3 photos",
+      "slotStatus": "Photo {{current}}/{{total}}",
+      "takePhoto": "Take Photo",
+      "uploadPhoto": "Upload Photo",
+      "retake": "Retake",
+      "reselect": "Reselect",
+      "adjustPosition": "Adjust Position",
+      "rotate": "Rotate",
+      "zoom": "Zoom"
+    },
+    "step4": {
+      "title": "Complete! 🎉",
+      "description": "Share your creation with the world",
+      "download": "Download",
+      "share": "Share",
+      "shareStats": "This challenge has helped {{name}} reach {{count}} more people!",
+      "createAnother": "Create Another Challenge"
+    },
+    "progress": {
+      "frameSelected": "Frame Selected",
+      "dogMatched": "Dog Matched",
+      "photosCompleted": "Photos Completed",
+      "resultGenerated": "Result Generated"
+    },
+    "validation": {
+      "selectFrame": "Please select a frame",
+      "selectDog": "Please select a dog",
+      "completePhotos": "Please complete all photo slots",
+      "invalidFileType": "Invalid file type. Please use JPG, PNG, or HEIC",
+      "fileTooLarge": "File size exceeds 10MB limit"
+    }
+  },
+  "dog": {
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "ageYears": "{{age}} years old",
+    "details": {
+      "description": "Description",
+      "personality": "Personality",
+      "healthStatus": "Health Status",
+      "adoptionRequirements": "Adoption Requirements"
+    },
+    "actions": {
+      "adopt": "Inquire About Adoption",
+      "share": "Share This Dog",
+      "challenge": "Create Challenge"
+    },
+    "fromChallenge": "Came from Challenge",
+    "qrScanned": "QR Code Scanned"
+  },
+  "footer": {
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "followUs": "Follow Us",
+    "copyright": "© 2025 SecondChance Global. All rights reserved."
+  }
+}
