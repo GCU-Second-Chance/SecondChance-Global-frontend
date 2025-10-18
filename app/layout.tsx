@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { GoogleAnalytics } from "@/lib/analytics";
 import { I18nProvider } from "@/lib/i18n";
 import { QueryProvider } from "@/lib/react-query";
 import "./globals.css";
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <GoogleAnalytics />
         <I18nProvider>
           <QueryProvider>
             <div className="flex min-h-screen flex-col">

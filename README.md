@@ -77,11 +77,16 @@ npm run type-check   # TypeScript type checking
 .
 ├── app/                 # Next.js App Router pages
 ├── components/          # React components
+│   └── layout/         # Layout components (Header, Footer, Container)
 ├── lib/                 # Utility functions
+│   ├── analytics/      # Google Analytics utilities
+│   ├── api/            # API fetcher and error handling
+│   ├── i18n/           # Internationalization config
+│   ├── motion/         # Framer Motion presets
+│   └── react-query/    # React Query configuration
 ├── stores/              # Zustand stores
-├── types/               # TypeScript types
 ├── public/              # Static assets
-└── i18n/                # Internationalization
+└── AGENTS.md            # Project specifications
 ```
 
 ## 🌍 Supported Languages
@@ -90,6 +95,32 @@ npm run type-check   # TypeScript type checking
 - English
 - 日本語 (Japanese)
 - 中文简体 (Chinese Simplified)
+
+## 📊 Analytics Events
+
+The application tracks the following custom events:
+
+**Challenge Flow:**
+- `dog_matched` - When a dog is matched with a user
+- `challenge_step` - Step progression (1-4)
+- `challenge_completed` - Challenge completion with timing
+
+**Sharing:**
+- `dog_shared` - When share button is clicked
+- `share_completed` - When share is successful
+- `share_platform` - Platform selection tracking
+
+**QR Code:**
+- `qr_scanned` - QR code scanned from result
+- `challenge_conversion` - Actions taken after QR scan
+- `challenge_to_share` - Additional shares from QR
+
+**User Interactions:**
+- `frame_selected` - Frame template selection
+- `photo_uploaded` - Photo upload method tracking
+- `result_downloaded` - Result image download
+
+See `lib/analytics/events.ts` for complete event definitions.
 
 ## 🤝 Contributing
 
