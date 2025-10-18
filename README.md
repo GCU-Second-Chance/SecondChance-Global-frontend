@@ -46,8 +46,9 @@ cp .env.example .env.local
 
 | Variable | Description | Example |
 |----------|-------------|---------|
+| `NEXT_PUBLIC_API_URL` | API Base URL | `http://localhost:3001/api` |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics Measurement ID | `G-XXXXXXXXXX` |
-| `NEXT_PUBLIC_API_URL` | API Base URL | `http://localhost:3000/api` |
+| `NEXT_PUBLIC_GTM_ID` | Google Tag Manager Container ID | `GTM-XXXXXXX` |
 | `GCP_TRANSLATION_API_KEY` | GCP Translation API Key (optional) | - |
 
 ### 4. Run the development server

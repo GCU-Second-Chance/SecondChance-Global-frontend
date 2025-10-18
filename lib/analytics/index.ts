@@ -3,7 +3,8 @@
  * Central export point for analytics utilities
  */
 
-export { GA_MEASUREMENT_ID, isGAEnabled, pageview } from "./gtag";
-export { GoogleAnalytics } from "./GoogleAnalytics";
+export * from "./events";
+export * from "./gtag";
 export * from "./logger";
-export type * from "./events";
+export { GoogleAnalytics } from "./GoogleAnalytics";
+export { GoogleTagManager } from "./GoogleTagManager";
