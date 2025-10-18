@@ -19,7 +19,7 @@ export default function ChallengePage() {
   };
 
   return (
-    <div className="container mx-auto max-w-md px-4 py-12">
+    <div className="container mx-auto max-w-md px-6 pt-32 ">
       <motion.div
         className="text-center"
         initial={{ opacity: 0, y: 20 }}
@@ -30,7 +30,9 @@ export default function ChallengePage() {
         <div className="mb-6 text-7xl">❤️</div>
 
         {/* Title */}
-        <h1 className="mb-4 text-3xl font-bold text-gray-900">Give a Dog a Second Chance</h1>
+        <h1 className="mb-4 text-3xl font-bold text-gray-900">
+          Give a Dog, <br /> Second Chance
+        </h1>
 
         {/* Description */}
         <p className="mb-8 text-base text-gray-600">
