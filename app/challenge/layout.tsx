@@ -27,6 +27,7 @@ export default function ChallengeLayout({ children }: { children: React.ReactNod
       window.addEventListener("beforeunload", handleBeforeUnload);
       return () => window.removeEventListener("beforeunload", handleBeforeUnload);
     }
+    return undefined;
   }, [step]);
 
   const handleBack = () => {

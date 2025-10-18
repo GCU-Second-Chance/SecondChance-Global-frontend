@@ -15,7 +15,11 @@ import { getDogById } from "@/data/dogs";
 import type { Dog } from "@/stores/types";
 import { logChallengeConversion, logDogShared, logQRScanned } from "@/lib/analytics";
 
-export default function DogDetailPage({ params }: { params: { id: string } }) {
+interface DogDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function DogDetailPage({ params }: DogDetailPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [dog, setDog] = useState<Dog | null>(null);
@@ -25,18 +29,21 @@ export default function DogDetailPage({ params }: { params: { id: string } }) {
   const fromChallenge = searchParams.get("from") === "challenge";
 
   useEffect(() => {
-    // Fetch dog data
-    const fetchedDog = getDogById(params.id);
-    setDog(fetchedDog || null);
-    setIsLoading(false);
+    // Unwrap params Promise
+    params.then((resolvedParams) => {
+      // Fetch dog data
+      const fetchedDog = getDogById(resolvedParams.id);
+      setDog(fetchedDog || null);
+      setIsLoading(false);
 
-    // Log QR scan if coming from challenge
-    if (fromChallenge && fetchedDog) {
-      logQRScanned(fetchedDog.id, "challenge_result");
-    } else if (fetchedDog) {
-      logQRScanned(fetchedDog.id, "social_share");
-    }
-  }, [params.id, fromChallenge]);
+      // Log QR scan if coming from challenge
+      if (fromChallenge && fetchedDog) {
+        logQRScanned(fetchedDog.id, "challenge_result");
+      } else if (fetchedDog) {
+        logQRScanned(fetchedDog.id, "social_share");
+      }
+    });
+  }, [params, fromChallenge]);
 
   const handleShare = async () => {
     if (!dog) return;
