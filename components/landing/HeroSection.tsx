@@ -57,7 +57,7 @@ export default function HeroSection() {
         >
           <Link href="/challenge" className="w-full">
             <button className="w-full rounded-full bg-[#ff6b5a] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#ff5745] hover:shadow-md md:py-3.5 md:text-base">
-              Start Your Search
+              Start Challenge
             </button>
           </Link>
           <Link href="/challenge" className="w-full">
