@@ -4,6 +4,7 @@ import { GoogleAnalytics } from "@/lib/analytics";
 import { I18nProvider } from "@/lib/i18n";
 import { QueryProvider } from "@/lib/react-query";
 import "./globals.css";
+import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 
@@ -36,8 +37,9 @@ export default function RootLayout({
           <QueryProvider>
             <div className="flex min-h-screen flex-col">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1 pb-16 md:pb-0">{children}</main>
               <Footer />
+              <BottomNavigation />
             </div>
           </QueryProvider>
         </I18nProvider>
