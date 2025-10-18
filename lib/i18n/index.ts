@@ -3,7 +3,9 @@
  * Central export point for internationalization utilities
  */
 
-export { default as i18n } from "./config";
-export { type LanguageCode, languages } from "./config";
-export { LanguageSwitcher } from "./LanguageSwitcher";
+// Export language constants (safe for server-side)
+export { type LanguageCode, languages } from "./languages";
+
+// Export client-side components
 export { I18nProvider } from "./provider";
+export { LanguageSwitcher } from "./LanguageSwitcher";

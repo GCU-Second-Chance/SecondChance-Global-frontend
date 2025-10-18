@@ -14,5 +14,14 @@
   },
   "path-intellisense.mappings": {
     "@": "${workspaceRoot}"
+  },
+  "github.copilot.chat.mcp.servers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "mcp-figma"],
+      "env": {
+        "FIGMA_PERSONAL_ACCESS_TOKEN": "${env:FIGMA_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
   }
 }

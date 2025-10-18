@@ -6,7 +6,7 @@
  */
 
 import { useTranslation } from "react-i18next";
-import { type LanguageCode, languages } from "./config";
+import { type LanguageCode, languages } from "./languages";
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();

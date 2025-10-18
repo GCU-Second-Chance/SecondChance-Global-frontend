@@ -7,27 +7,24 @@
 
 import { type ReactNode, useEffect, useState } from "react";
 import { I18nextProvider } from "react-i18next";
-import i18n from "./config";
+import { initializeI18n } from "./config";
 
 interface I18nProviderProps {
   children: ReactNode;
 }
 
 export function I18nProvider({ children }: I18nProviderProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [i18nInstance, setI18nInstance] = useState<ReturnType<typeof initializeI18n> | null>(null);
 
   useEffect(() => {
-    // Ensure i18n is initialized on client side
-    if (!i18n.isInitialized) {
-      i18n.init().then(() => setIsInitialized(true));
-    } else {
-      setIsInitialized(true);
-    }
+    // Initialize i18n only on client side
+    const instance = initializeI18n();
+    setI18nInstance(instance);
   }, []);
 
-  if (!isInitialized) {
+  if (!i18nInstance) {
     return null; // or a loading spinner
   }
 
-  return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
+  return <I18nextProvider i18n={i18nInstance}>{children}</I18nextProvider>;
 }
