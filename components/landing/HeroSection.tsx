@@ -14,7 +14,7 @@ export default function HeroSection() {
     <section className="relative overflow-hidden bg-white px-4 py-6 md:py-12">
       <div className="container mx-auto max-w-md md:max-w-2xl">
         {/* Hero Image with Animation */}
-        <motion.div
+        {/* <motion.div
           className="mb-4 overflow-hidden rounded-2xl md:mb-6 md:rounded-3xl"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -25,7 +25,7 @@ export default function HeroSection() {
               <p className="text-sm md:text-lg">📸 Hero Image / Slideshow Area</p>
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Main Heading with Animation */}
         <motion.h1
