@@ -26,17 +26,25 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [facingMode, setFacingMode] = useState<FacingMode>("user");
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   // Request camera permission and start stream
   const startCamera = async (facing: FacingMode = "user") => {
+    console.log("🎥 [Camera] Starting camera initialization...", { facing });
     setCameraState("requesting");
     setErrorMessage("");
+    setIsVideoReady(false);
 
     try {
       // Stop existing stream if any
       if (streamRef.current) {
+        console.log("🎥 [Camera] Stopping existing stream");
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
+
+      // Check available cameras first (parallel)
+      console.log("🎥 [Camera] Enumerating devices...");
+      const devicesPromise = navigator.mediaDevices.enumerateDevices();
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -47,22 +55,57 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
         audio: false,
       };
 
+      console.log("🎥 [Camera] Requesting getUserMedia with constraints:", constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("🎥 [Camera] ✅ Stream received", {
+        tracks: stream.getTracks().length,
+        settings: stream.getVideoTracks()[0]?.getSettings(),
+      });
       streamRef.current = stream;
 
       if (videoRef.current) {
+        console.log("🎥 [Camera] Setting video srcObject");
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          console.log("🎥 [Camera] Video metadata loaded");
+          videoRef.current
+            ?.play()
+            .then(() => {
+              console.log("🎥 [Camera] ✅ Video playing successfully");
+              setIsVideoReady(true);
+              setCameraState("active");
+            })
+            .catch((playError) => {
+              console.error("🎥 [Camera] ❌ Video play failed:", playError);
+            });
+        };
+
+        // Add timeout in case onloadedmetadata never fires
+        setTimeout(() => {
+          if (!isVideoReady) {
+            console.warn("🎥 [Camera] ⚠️ Video metadata timeout - forcing play");
+            videoRef.current
+              ?.play()
+              .then(() => {
+                setIsVideoReady(true);
+                setCameraState("active");
+              })
+              .catch((err) => {
+                console.error("🎥 [Camera] ❌ Forced play failed:", err);
+              });
+          }
+        }, 3000);
       }
 
-      setCameraState("active");
-
-      // Check if device has multiple cameras
-      const devices = await navigator.mediaDevices.enumerateDevices();
+      // Check if device has multiple cameras (don't block video loading)
+      const devices = await devicesPromise;
       const videoDevices = devices.filter((device) => device.kind === "videoinput");
+      console.log("🎥 [Camera] Available cameras:", videoDevices.length);
       setHasMultipleCameras(videoDevices.length > 1);
     } catch (error) {
-      console.error("Camera error:", error);
+      console.error("🎥 [Camera] ❌ Error:", error);
       setCameraState("error");
 
       if (error instanceof Error) {
@@ -167,23 +210,31 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
 
         {/* Camera View */}
         <div className="relative flex h-full w-full items-center justify-center">
-          {cameraState === "active" && (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="h-full w-full object-cover"
-            />
-          )}
+          {/* Video Element (hidden until ready) */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`h-full w-full scale-x-[-1] object-cover transition-opacity duration-300 ${
+              isVideoReady ? "opacity-100" : "opacity-0"
+            }`}
+          />
 
-          {cameraState === "requesting" && (
-            <div className="flex flex-col items-center gap-4 text-white">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/30 border-t-white" />
-              <p>Accessing camera...</p>
+          {/* Loading State */}
+          {(cameraState === "requesting" || !isVideoReady) && cameraState !== "error" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black text-white">
+              <div className="h-16 w-16 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+              <p className="text-lg">Starting camera...</p>
+              <p className="text-sm text-white/70">
+                {cameraState === "requesting"
+                  ? "Requesting permission..."
+                  : "Initializing video..."}
+              </p>
             </div>
           )}
 
+          {/* Error State */}
           {cameraState === "error" && (
             <div className="max-w-md px-6 text-center">
               <Camera className="mx-auto mb-4 h-16 w-16 text-white/50" />
@@ -200,7 +251,7 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
         </div>
 
         {/* Controls */}
-        {cameraState === "active" && (
+        {cameraState === "active" && isVideoReady && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-8">
             <div className="flex items-center justify-center gap-8">
               {/* Flip Camera Button */}

@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white px-4 py-6 md:py-12">
+    <section className="relative overflow-hidden bg-white px-4 min-h-screen flex justify-center items-center py-6 md:py-12">
       <div className="container mx-auto max-w-md md:max-w-2xl">
         {/* Hero Image with Animation */}
         {/* <motion.div
