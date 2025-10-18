@@ -141,7 +141,10 @@ export const staggerItem: Variants = {
 /**
  * Custom stagger configuration
  */
-export const customStagger = (staggerChildren: number = 0.1, delayChildren: number = 0): Variants => ({
+export const customStagger = (
+  staggerChildren: number = 0.1,
+  delayChildren: number = 0
+): Variants => ({
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
