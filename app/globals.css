@@ -36,6 +36,15 @@
   --accent-light: #fde68a;
   --accent-dark: #f59e0b;
 
+  /* Figma Design System - Additional Colors */
+  --beige: #fef5ec;
+  --beige-light: #fff9f3;
+  --cream: #fff4e6;
+  --peach: #ffe5db;
+  --peach-light: #fff0ea;
+  --orange-gradient-start: #ff6b4a;
+  --orange-gradient-end: #ffa726;
+
   /* Semantic Colors */
   --success: #10b981;
   --success-light: #d1fae5;
