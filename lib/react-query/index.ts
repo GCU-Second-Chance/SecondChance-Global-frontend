@@ -5,3 +5,4 @@
 
 export { QueryProvider } from "./provider";
 export { queryClient } from "./client";
+export * from "./hooks";

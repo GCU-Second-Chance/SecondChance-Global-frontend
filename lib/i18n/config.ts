@@ -5,7 +5,7 @@
 
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { resources, type LanguageCode } from "./languages";
+import { type LanguageCode, resources } from "./languages";
 
 // Get browser language or fallback to English
 const getBrowserLanguage = (): LanguageCode => {
