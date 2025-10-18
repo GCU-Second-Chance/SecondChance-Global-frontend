@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "SecondChance Global",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "retry": "재시도",
+    "cancel": "취소",
+    "confirm": "확인",
+    "close": "닫기",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "수정",
+    "next": "다음",
+    "previous": "이전",
+    "back": "뒤로"
+  },
+  "landing": {
+    "hero": {
+      "title": "모든 공유는 두 번째 기회입니다",
+      "subtitle": "유기견과 함께하는 특별한 인생네컷 챌린지",
+      "startChallenge": "챌린지 시작하기",
+      "viewDogs": "유기견 만나기"
+    },
+    "stats": {
+      "totalShares": "총 공유 횟수",
+      "adoptionSuccess": "입양 성공",
+      "participatingCountries": "참여 국가"
+    },
+    "howItWorks": {
+      "title": "이용 방법",
+      "step1": {
+        "title": "챌린지 참여",
+        "description": "유기견과 함께 인생네컷을 제작하세요"
+      },
+      "step2": {
+        "title": "SNS 공유",
+        "description": "친구들에게 공유해주세요"
+      },
+      "step3": {
+        "title": "입양 연결",
+        "description": "새로운 가족을 만나도록 도와주세요"
+      }
+    },
+    "successStories": {
+      "title": "성공 스토리",
+      "viewMore": "더 많은 스토리 보기"
+    },
+    "featuredDogs": {
+      "title": "긴급 케이스",
+      "urgent": "긴급",
+      "helpNow": "지금 도와주기"
+    }
+  },
+  "challenge": {
+    "step1": {
+      "title": "프레임을 선택하세요",
+      "description": "원하는 프레임 스타일을 골라주세요",
+      "useThisFrame": "이 프레임 사용하기"
+    },
+    "step2": {
+      "title": "함께할 아이를 선택하세요",
+      "description": "운명의 아이를 만나보세요",
+      "meetRandomDog": "운명의 아이 만나기",
+      "directSelect": "직접 선택하기",
+      "viewOtherDog": "다른 아이 보기",
+      "selectThisDog": "이 아이와 함께",
+      "dogInfo": {
+        "name": "이름",
+        "age": "나이",
+        "gender": "성별",
+        "breed": "견종",
+        "location": "위치",
+        "shelter": "보호소",
+        "contact": "연락처"
+      }
+    },
+    "step3": {
+      "title": "사진을 추가하세요",
+      "description": "3장의 사진을 업로드하거나 촬영하세요",
+      "slotStatus": "사진 {{current}}/{{total}}",
+      "takePhoto": "촬영하기",
+      "uploadPhoto": "파일 선택",
+      "retake": "다시 찍기",
+      "reselect": "다시 선택",
+      "adjustPosition": "위치 조정",
+      "rotate": "회전",
+      "zoom": "줌"
+    },
+    "step4": {
+      "title": "완성되었어요! 🎉",
+      "description": "세상에 공유해주세요",
+      "download": "다운로드",
+      "share": "공유하기",
+      "shareStats": "이 챌린지로 {{name}}이(가) {{count}}명에게 더 알려졌어요!",
+      "createAnother": "다른 아이와 챌린지하기"
+    },
+    "progress": {
+      "frameSelected": "프레임 선택",
+      "dogMatched": "유기견 매칭",
+      "photosCompleted": "사진 완료",
+      "resultGenerated": "결과 생성"
+    },
+    "validation": {
+      "selectFrame": "프레임을 선택해주세요",
+      "selectDog": "유기견을 선택해주세요",
+      "completePhotos": "모든 사진을 채워주세요",
+      "invalidFileType": "지원하지 않는 파일 형식입니다. JPG, PNG, HEIC를 사용해주세요",
+      "fileTooLarge": "파일 크기가 10MB를 초과합니다"
+    }
+  },
+  "dog": {
+    "gender": {
+      "male": "남아",
+      "female": "여아"
+    },
+    "ageYears": "{{age}}살",
+    "details": {
+      "description": "설명",
+      "personality": "성격",
+      "healthStatus": "건강 상태",
+      "adoptionRequirements": "입양 조건"
+    },
+    "actions": {
+      "adopt": "입양 문의하기",
+      "share": "공유하기",
+      "challenge": "챌린지 만들기"
+    },
+    "fromChallenge": "챌린지에서 왔어요",
+    "qrScanned": "QR 코드 스캔됨"
+  },
+  "footer": {
+    "about": "소개",
+    "contact": "문의",
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "followUs": "팔로우",
+    "copyright": "© 2025 SecondChance Global. All rights reserved."
+  }
+}
