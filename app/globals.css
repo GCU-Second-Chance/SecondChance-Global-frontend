@@ -36,7 +36,7 @@
   --accent-light: #fde68a;
   --accent-dark: #f59e0b;
 
-  /* Figma Design System - Additional Colors */
+  /* Figma Design System - Mobile Landing Page Colors */
   --beige: #fef5ec;
   --beige-light: #fff9f3;
   --cream: #fff4e6;
@@ -44,6 +44,15 @@
   --peach-light: #fff0ea;
   --orange-gradient-start: #ff6b4a;
   --orange-gradient-end: #ffa726;
+
+  /* New Landing Page Colors from Figma */
+  --landing-bg: #f5f5f0;
+  --green-bg: #97a768;
+  --green-bg-light: #a8b67a;
+  --coral-red: #ff6b5a;
+  --coral-red-hover: #ff5745;
+  --light-pink: #ffd4d4;
+  --light-peach: #ffe8e0;
 
   /* Semantic Colors */
   --success: #10b981;

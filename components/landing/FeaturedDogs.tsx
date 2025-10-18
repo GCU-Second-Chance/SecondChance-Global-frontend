@@ -1,99 +1,84 @@
 /**
  * Featured Dogs Section Component
- * Displays urgent rescue cases
+ * Displays urgent rescue cases matching Figma design
  */
+
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function FeaturedDogs() {
   // Mock data - will be replaced with real data later
   const featuredDogs = [
     {
       id: 1,
-      name: "별이",
-      age: 3,
-      gender: "female",
-      location: "Seoul",
-      urgent: true,
+      name: "Buddy",
+      age: 2,
       image: "🐕",
     },
     {
       id: 2,
-      name: "초코",
-      age: 2,
-      gender: "male",
-      location: "Busan",
-      urgent: true,
+      name: "Daisy",
+      age: 1,
       image: "🐶",
     },
     {
       id: 3,
-      name: "구름",
-      age: 5,
-      gender: "female",
-      location: "Incheon",
-      urgent: false,
+      name: "Rocky",
+      age: 4,
       image: "🦮",
     },
     {
       id: 4,
-      name: "뭉치",
-      age: 1,
-      gender: "male",
-      location: "Daegu",
-      urgent: true,
+      name: "Coco",
+      age: 2,
       image: "🐕‍🦺",
     },
   ];
 
   return (
-    <section className="bg-gray-50 py-20">
-      <div className="container mx-auto px-4">
+    <section className="bg-white px-4 py-8 md:py-12">
+      <div className="container mx-auto max-w-md md:max-w-2xl">
         {/* Section Title */}
-        <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">긴급 케이스</h2>
-          <p className="text-lg text-gray-600">지금 도움이 필요한 아이들</p>
-        </div>
+        <motion.div
+          className="mb-6 text-left md:mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="mb-2 text-xl font-bold text-gray-900 md:text-2xl">Urgent Cases</h2>
+        </motion.div>
 
         {/* Dogs Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredDogs.map((dog) => (
-            <div
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
+          {featuredDogs.map((dog, index) => (
+            <motion.div
               key={dog.id}
-              className="group relative overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-xl"
+              className="group relative overflow-hidden rounded-2xl bg-gray-50 shadow-sm transition-all hover:shadow-md"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.05 }}
             >
-              {/* Urgent Badge */}
-              {dog.urgent && (
-                <div className="absolute left-4 top-4 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                  긴급
-                </div>
-              )}
-
               {/* Image Placeholder */}
-              <div className="flex h-56 items-center justify-center bg-gradient-to-br from-primary-100 to-primary-200 text-7xl transition-transform group-hover:scale-105">
+              <div className="flex h-36 items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-5xl transition-transform group-hover:scale-105 md:h-48 md:text-6xl">
                 {dog.image}
               </div>
 
               {/* Content */}
-              <div className="p-5">
-                <h3 className="mb-2 text-xl font-bold text-gray-900">{dog.name}</h3>
-                <div className="mb-3 space-y-1 text-sm text-gray-600">
-                  <div>
-                    {dog.age}살 · {dog.gender === "male" ? "남아" : "여아"}
-                  </div>
-                  <div>📍 {dog.location}</div>
-                </div>
-                <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-primary-600">
-                  지금 도와주기
-                </button>
+              <div className="p-3 md:p-4">
+                <h3 className="mb-1 text-base font-bold text-gray-900 md:text-lg">{dog.name}</h3>
+                <div className="mb-3 text-xs text-gray-600 md:text-sm">{dog.age} years old</div>
+                <Link href={`/dog/${dog.id}`}>
+                  <button className="w-full rounded-full bg-[#ff6b5a] px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-[#ff5745] md:text-sm">
+                    Help Now
+                  </button>
+                </Link>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
-
-        {/* View All Button */}
-        <div className="mt-12 text-center">
-          <button className="rounded-lg border-2 border-gray-300 bg-white px-8 py-3 font-semibold text-gray-700 transition-all hover:border-primary hover:text-primary">
-            모든 유기견 보기
-          </button>
         </div>
       </div>
     </section>

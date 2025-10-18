@@ -70,33 +70,53 @@ function CountUpAnimation({
 
 export default function QuickStats() {
   return (
-    <section className="bg-gradient-to-b from-white to-[#fff9f3] py-16 md:py-20">
-      <div className="container mx-auto px-4">
+    <section className="bg-white px-4 py-8 md:py-12">
+      <div className="container mx-auto max-w-md md:max-w-2xl">
         <motion.div
-          className="mb-12 text-center"
+          className="mb-6 text-left md:mb-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Our Impact</h2>
-          <p className="text-lg text-gray-600">Together, we&apos;re making a difference</p>
+          <h2 className="mb-2 text-xl font-bold text-gray-900 md:text-2xl">Quick Stats</h2>
         </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
-          {stats.map((stat, index) => (
+        {/* Featured Stat Card */}
+        <motion.div
+          className="mb-4 flex items-center gap-3 rounded-2xl bg-gray-50 p-4 shadow-sm md:mb-6 md:gap-4 md:p-6"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <div className="flex-shrink-0">
+            <div className="h-12 w-12 overflow-hidden rounded-xl bg-gray-200 md:h-16 md:w-16">
+              <div className="flex h-full items-center justify-center text-2xl md:text-3xl">🐕</div>
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="mb-0.5 text-xl font-bold text-gray-900 md:mb-1 md:text-2xl">
+              <CountUpAnimation end={12000} suffix="+ Dogs Rescued" />
+            </div>
+            <div className="text-xs text-gray-600 md:text-sm">Across 50+ countries</div>
+          </div>
+        </motion.div>
+
+        {/* Grid Stats */}
+        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+          {stats.slice(1).map((stat, index) => (
             <motion.div
               key={stat.label}
-              className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm transition-all hover:shadow-xl"
+              className="rounded-2xl bg-gray-50 p-4 text-center shadow-sm transition-all hover:shadow-md md:p-6"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -4 }}
+              transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
             >
-              <div className="mb-4 text-5xl">{stat.icon}</div>
+              <div className="mb-2 text-3xl md:mb-3 md:text-4xl">{stat.icon}</div>
               <CountUpAnimation end={stat.value} suffix={stat.suffix} />
-              <div className="mt-2 text-sm text-gray-600">{stat.label}</div>
+              <div className="mt-1 text-xs text-gray-600 md:mt-2 md:text-sm">{stat.label}</div>
             </motion.div>
           ))}
         </div>
