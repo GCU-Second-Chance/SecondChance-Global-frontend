@@ -8,9 +8,13 @@ export interface Frame {
   id: string;
   name: string;
   thumbnail: string;
-  template: "2x2" | "4x1" | "1x4";
+  frameLayout: 1 | 2;
   dogSlots: number[]; // Indices where dog photos go (0-3)
   userSlots: number[]; // Indices where user photos go (0-3)
+  // Decorative properties for themed frames
+  backgroundColor?: string;
+  borderColor?: string;
+  textColor?: string; // Text color for bottom text
 }
 
 // Dog types

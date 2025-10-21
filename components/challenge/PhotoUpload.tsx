@@ -10,10 +10,11 @@ import { Upload } from "lucide-react";
 import { validateImageFile } from "@/lib/utils/file-validator";
 
 interface PhotoUploadProps {
-  onUpload: (file: File) => void;
+  onUpload: (file: File, frameId: string) => void; // Added frameId to associate uploads with frames
   onError: (error: string) => void;
   accept?: string;
   disabled?: boolean;
+  frameId: string; // New prop to identify the frame
 }
 
 export default function PhotoUpload({
@@ -21,6 +22,7 @@ export default function PhotoUpload({
   onError,
   accept = "image/jpeg,image/jpg,image/png,image/heic",
   disabled = false,
+  frameId,
 }: PhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -42,7 +44,7 @@ export default function PhotoUpload({
       return;
     }
 
-    onUpload(file);
+    onUpload(file, frameId); // Pass frameId with the file
 
     // Reset input for next upload
     if (inputRef.current) {

@@ -1,20 +1,21 @@
+"use client";
+
 /**
  * Photo Upload Page - Step 3
  * Upload or capture user photos for the challenge
  */
 
-"use client";
-
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Camera } from "lucide-react";
 import { useChallengeStore } from "@/stores";
-import PhotoSlotPreview from "@/components/challenge/PhotoSlotPreview";
 import PhotoUpload from "@/components/challenge/PhotoUpload";
-import CameraCapture from "@/components/challenge/CameraCapture";
 import { compressImage } from "@/lib/utils/file-validator";
 import { logPhotoUploaded } from "@/lib/analytics";
+import FrameLayout from "@/components/challenge/FrameLayout";
+import { captureNodeToPng } from "@/lib/utils/capture";
+import CameraCapture from "@/components/challenge/CameraCapture";
 
 export default function UploadPhotosPage() {
   const router = useRouter();
@@ -26,12 +27,15 @@ export default function UploadPhotosPage() {
     clearPhotoSlot,
     progress,
     nextStep,
+    setResultImage,
   } = useChallengeStore();
 
   const [currentSlotIndex, setCurrentSlotIndex] = useState<number | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
   const [error, setError] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGeneratingResult, setIsGeneratingResult] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const frameRef = useRef<HTMLDivElement | null>(null);
 
   // Redirect if prerequisites not met
   useEffect(() => {
@@ -53,7 +57,7 @@ export default function UploadPhotosPage() {
   }, [photoSlots, currentSlotIndex]);
 
   const handlePhotoUpload = async (file: File, uploadMethod: "camera" | "file") => {
-    if (currentSlotIndex === null) return;
+    if (currentSlotIndex === null || !selectedFrame) return; // Ensure selectedFrame is available
 
     setIsProcessing(true);
     setError("");
@@ -94,6 +98,7 @@ export default function UploadPhotosPage() {
 
   const handleCameraCapture = (file: File) => {
     handlePhotoUpload(file, "camera");
+    setIsCameraOpen(false);
   };
 
   const handleRemovePhoto = (index: number) => {
@@ -108,9 +113,32 @@ export default function UploadPhotosPage() {
     }
   };
 
-  const handleContinue = () => {
-    nextStep(); // Move to step 4
-    router.push("/challenge/result");
+  const handleContinue = async () => {
+    if (!progress.photosCompleted || isProcessing || isGeneratingResult) {
+      return;
+    }
+
+    if (!frameRef.current) {
+      setError("Unable to prepare the result preview. Please try again.");
+      return;
+    }
+
+    try {
+      setIsGeneratingResult(true);
+
+      const dataUrl = await captureNodeToPng(frameRef.current, {
+        excludeSelectors: ["#remove"],
+      });
+
+      setResultImage(dataUrl);
+      nextStep();
+      router.push("/challenge/result");
+    } catch (err) {
+      console.error("Result generation error:", err);
+      setError("Failed to generate the result. Please try again.");
+    } finally {
+      setIsGeneratingResult(false);
+    }
   };
 
   if (!selectedFrame || !matchedDog) {
@@ -156,34 +184,34 @@ export default function UploadPhotosPage() {
         </div>
       </div>
 
-      {/* Photo Grid */}
-      <div className="mb-6 grid grid-cols-2 gap-4">
-        {photoSlots.map((slot) => (
-          <PhotoSlotPreview
-            key={slot.index}
-            slot={slot}
-            isActive={slot.index === currentSlotIndex}
-            onClick={() => handleSlotClick(slot.index)}
-            onRemove={slot.type === "user" ? () => handleRemovePhoto(slot.index) : undefined}
-          />
-        ))}
+      {/* Photo Grid - replaced with FrameLayout */}
+      <div>
+        <FrameLayout
+          ref={frameRef}
+          frameLayout={selectedFrame.frameLayout}
+          frameId={selectedFrame.id}
+          photoSlots={photoSlots}
+          currentSlotIndex={currentSlotIndex}
+          onSlotClick={handleSlotClick}
+          onRemove={handleRemovePhoto}
+        />
       </div>
 
       {/* Upload Controls */}
       {currentSlotIndex !== null && (
         <motion.div
-          className="mb-6 space-y-3"
+          className="mb-6  mt-6 space-y-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <p className="text-center text-sm font-medium text-gray-700">
+          <p className="text-center text-lg font-medium text-gray-700">
             Add photo for slot {currentSlotIndex + 1}
           </p>
 
           {/* Camera Button */}
           <button
-            onClick={() => setShowCamera(true)}
+            onClick={() => setIsCameraOpen(true)}
             disabled={isProcessing}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ff6b5a] px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-[#ff5544] disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -192,7 +220,12 @@ export default function UploadPhotosPage() {
           </button>
 
           {/* File Upload Button */}
-          <PhotoUpload onUpload={handleFileUpload} onError={setError} disabled={isProcessing} />
+          <PhotoUpload
+            onUpload={handleFileUpload}
+            onError={setError}
+            disabled={isProcessing}
+            frameId={selectedFrame.id}
+          />
         </motion.div>
       )}
 
@@ -215,14 +248,18 @@ export default function UploadPhotosPage() {
       >
         <button
           onClick={handleContinue}
-          disabled={!progress.photosCompleted || isProcessing}
-          className={`w-full rounded-full px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all ${
-            progress.photosCompleted && !isProcessing
+          disabled={!progress.photosCompleted || isProcessing || isGeneratingResult}
+          className={` mt-6 w-full rounded-full px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all ${
+            progress.photosCompleted && !isProcessing && !isGeneratingResult
               ? "bg-[#ff6b5a] hover:bg-[#ff5745] hover:shadow-md"
               : "cursor-not-allowed bg-gray-300"
           }`}
         >
-          {isProcessing ? "Processing..." : "Continue to Result"}
+          {isGeneratingResult
+            ? "Preparing Result..."
+            : isProcessing
+              ? "Processing..."
+              : "Continue to Result"}
         </button>
       </motion.div>
 
@@ -236,10 +273,8 @@ export default function UploadPhotosPage() {
           <li>• Have fun and be creative!</li>
         </ul>
       </div>
-
-      {/* Camera Modal */}
-      {showCamera && (
-        <CameraCapture onCapture={handleCameraCapture} onClose={() => setShowCamera(false)} />
+      {isCameraOpen && (
+        <CameraCapture onCapture={handleCameraCapture} onClose={() => setIsCameraOpen(false)} />
       )}
     </div>
   );

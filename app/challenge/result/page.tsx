@@ -5,23 +5,42 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Download, RefreshCw, Share2 } from "lucide-react";
-import Image from "next/image";
+import { Download, Share2 } from "lucide-react";
 import { useChallengeStore } from "@/stores";
-import { downloadImage, renderPhotoFrame } from "@/lib/canvas-renderer";
+import FrameLayoutResult from "@/components/challenge/FrameLayoutResult";
 import { logResultDownloaded, logShareCompleted } from "@/lib/analytics";
 
 export default function ResultPage() {
   const router = useRouter();
-  const { selectedFrame, matchedDog, photoSlots, resultImageUrl, setResultImage, progress } =
-    useChallengeStore();
-
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string>("");
+  const { selectedFrame, matchedDog, resultImageUrl, progress, photoSlots } = useChallengeStore();
   const [isSharing, setIsSharing] = useState(false);
+  const dataUrlToFile = useCallback((dataUrl: string, filename: string) => {
+    const [header, base64Data] = dataUrl.split(",");
+    if (!header || !base64Data) {
+      throw new Error("Invalid data URL");
+    }
+
+    const mimeMatch = header.match(/data:(.*?);base64/);
+    const mime = mimeMatch?.[1] ?? "image/png";
+    const binary = atob(base64Data);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new File([array], filename, { type: mime });
+  }, []);
+
+  function downloadImage(dataUrl: string, filename: string) {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   // Redirect if prerequisites not met
   useEffect(() => {
@@ -34,36 +53,17 @@ export default function ResultPage() {
     }
   }, [selectedFrame, matchedDog, progress, router]);
 
-  // Generate result on mount
+  // Remove unnecessary image generation logic
   useEffect(() => {
-    if (selectedFrame && matchedDog && progress.photosCompleted && !resultImageUrl) {
-      generateResult();
+    if (!resultImageUrl) {
+      router.push("/challenge/upload-photos");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFrame, matchedDog, progress.photosCompleted]);
+  }, [resultImageUrl, router]);
 
-  const generateResult = async () => {
-    if (!selectedFrame || !matchedDog) return;
-
-    setIsGenerating(true);
-    setError("");
-
-    try {
-      const dataUrl = await renderPhotoFrame({
-        frame: selectedFrame,
-        photoSlots: photoSlots,
-        dog: matchedDog,
-        outputWidth: 1080,
-      });
-
-      setResultImage(dataUrl);
-    } catch (err) {
-      console.error("Result generation error:", err);
-      setError("Failed to generate result. Please try again.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  const filledPhotos = useMemo(
+    () => photoSlots.filter((slot) => slot.imageUrl !== null),
+    [photoSlots]
+  );
 
   const handleDownload = () => {
     if (!resultImageUrl || !matchedDog) return;
@@ -81,12 +81,9 @@ export default function ResultPage() {
     setIsSharing(true);
 
     try {
-      // Convert data URL to blob
-      const response = await fetch(resultImageUrl);
-      const blob = await response.blob();
-      const file = new File([blob], `secondchance_${matchedDog.id}.png`, {
-        type: "image/png",
-      });
+      const filename = `secondchance_${matchedDog.id}.png`;
+      const file = dataUrlToFile(resultImageUrl, filename);
+      const shareUrl = `${window.location.origin}/dog/${matchedDog.id}`;
 
       // Share text
       const shareText = `🐾 ${matchedDog.name} is looking for a forever home!
@@ -100,24 +97,53 @@ Help this rescue dog find their second chance 💛
 
 👉 Scan the QR code to learn more!`;
 
-      // Check if Web Share API is supported
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          title: `Help ${matchedDog.name} find a home!`,
-          text: shareText,
-          files: [file],
-        });
+      const supportsShare =
+        typeof navigator !== "undefined" && typeof navigator.share === "function";
+      const canShareFiles = navigator.canShare?.({ files: [file] }) ?? false;
 
-        // Log analytics
-        logShareCompleted(matchedDog.id, matchedDog.name, "web_share");
-      } else {
+      if (supportsShare) {
+        try {
+          const shareData = canShareFiles
+            ? {
+                title: `Help ${matchedDog.name} find a home!`,
+                text: shareText,
+                files: [file],
+              }
+            : {
+                title: `Help ${matchedDog.name} find a home!`,
+                text: shareText,
+                url: shareUrl,
+              };
+
+          await navigator.share(shareData);
+
+          // Log analytics
+          logShareCompleted(
+            matchedDog.id,
+            matchedDog.name,
+            canShareFiles ? "web_share" : "web_share_text"
+          );
+          return;
+        } catch (shareError) {
+          // If user cancels, just exit quietly
+          if ((shareError as DOMException)?.name === "AbortError") {
+            return;
+          }
+          console.error("Share error via Web Share API:", shareError);
+        }
+      }
+
+      try {
         // Fallback: Copy link
-        const dogUrl = `${window.location.origin}/dog/${matchedDog.id}`;
-        await navigator.clipboard.writeText(dogUrl);
+        await navigator.clipboard.writeText(shareUrl);
         alert("Link copied to clipboard! Share it with your friends.");
 
         // Log analytics
         logShareCompleted(matchedDog.id, matchedDog.name, "link_copy");
+      } catch (clipboardError) {
+        console.error("Clipboard share error:", clipboardError);
+        // Last resort fallback: download
+        handleDownload();
       }
     } catch (err) {
       console.error("Share error:", err);
@@ -156,40 +182,27 @@ Help this rescue dog find their second chance 💛
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        {isGenerating ? (
+        {resultImageUrl && filledPhotos.length === photoSlots.length ? (
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+            <FrameLayoutResult
+              photos={photoSlots}
+              frameLayout={selectedFrame.frameLayout}
+              frameId={selectedFrame.id}
+              thumbnail={selectedFrame.thumbnail}
+            />
+          </div>
+        ) : (
           <div className="flex aspect-square w-full items-center justify-center rounded-2xl bg-gray-100">
             <div className="text-center">
               <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-[#ff6b5a]" />
               <p className="text-sm text-gray-600">Generating your masterpiece...</p>
             </div>
           </div>
-        ) : resultImageUrl ? (
-          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-            <Image
-              src={resultImageUrl}
-              alt="Challenge result"
-              width={1080}
-              height={1080}
-              className="h-auto w-full"
-              priority
-            />
-          </div>
-        ) : error ? (
-          <div className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl bg-red-50 p-8">
-            <p className="mb-4 text-center text-red-700">{error}</p>
-            <button
-              onClick={generateResult}
-              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Try Again
-            </button>
-          </div>
-        ) : null}
+        )}
       </motion.div>
 
       {/* Action Buttons */}
-      {resultImageUrl && !isGenerating && (
+      {resultImageUrl && (
         <motion.div
           className="mb-6 space-y-3"
           initial={{ opacity: 0, y: 20 }}
