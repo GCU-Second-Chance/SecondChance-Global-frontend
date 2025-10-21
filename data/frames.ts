@@ -20,10 +20,10 @@ export const frames: Frame[] = [
       height: 600,
     },
     slotPositions: [
-      { index: 0, top: 68, left: 36, width: 150, height: 206, borderRadius: 18 },
-      { index: 1, top: 68, left: 214, width: 150, height: 206, borderRadius: 18 },
-      { index: 2, top: 300, left: 36, width: 150, height: 206, borderRadius: 18 },
-      { index: 3, top: 300, left: 214, width: 150, height: 206, borderRadius: 18 },
+      { index: 0, top: 14, left: 14, width: 179, height: 241, borderRadius: 0 },
+      { index: 1, top: 14, left: 207, width: 179, height: 241, borderRadius: 0 },
+      { index: 2, top: 269, left: 14, width: 179, height: 241, borderRadius: 0 },
+      { index: 3, top: 269, left: 207, width: 179, height: 241, borderRadius: 0 },
     ],
   },
   {
@@ -40,10 +40,10 @@ export const frames: Frame[] = [
       height: 600,
     },
     slotPositions: [
-      { index: 0, top: 68, left: 36, width: 150, height: 206, borderRadius: 18 },
-      { index: 1, top: 68, left: 214, width: 150, height: 206, borderRadius: 18 },
-      { index: 2, top: 300, left: 36, width: 150, height: 206, borderRadius: 18 },
-      { index: 3, top: 300, left: 214, width: 150, height: 206, borderRadius: 18 },
+      { index: 0, top: 14, left: 14, width: 179, height: 241, borderRadius: 0 },
+      { index: 1, top: 14, left: 207, width: 179, height: 241, borderRadius: 0 },
+      { index: 2, top: 269, left: 14, width: 179, height: 241, borderRadius: 0 },
+      { index: 3, top: 269, left: 207, width: 179, height: 241, borderRadius: 0 },
     ],
   },
   {
@@ -60,10 +60,10 @@ export const frames: Frame[] = [
       height: 600,
     },
     slotPositions: [
-      { index: 0, top: 40, left: 20, width: 160, height: 120, borderRadius: 18 },
-      { index: 1, top: 180, left: 20, width: 160, height: 120, borderRadius: 18 },
-      { index: 2, top: 320, left: 20, width: 160, height: 120, borderRadius: 18 },
-      { index: 3, top: 460, left: 20, width: 160, height: 120, borderRadius: 18 },
+      { index: 0, top: 10.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
+      { index: 1, top: 141.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
+      { index: 2, top: 272.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
+      { index: 3, top: 403.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
     ],
   },
   {
@@ -80,10 +80,10 @@ export const frames: Frame[] = [
       height: 600,
     },
     slotPositions: [
-      { index: 0, top: 40, left: 20, width: 160, height: 120, borderRadius: 18 },
-      { index: 1, top: 180, left: 20, width: 160, height: 120, borderRadius: 18 },
-      { index: 2, top: 320, left: 20, width: 160, height: 120, borderRadius: 18 },
-      { index: 3, top: 460, left: 20, width: 160, height: 120, borderRadius: 18 },
+      { index: 0, top: 10.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
+      { index: 1, top: 141.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
+      { index: 2, top: 272.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
+      { index: 3, top: 403.5, left: 10.5, width: 179, height: 120.5, borderRadius: 0 },
     ],
   },
 ];

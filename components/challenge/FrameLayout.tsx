@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import Image from "next/image";
-import type { PhotoSlot } from "@/stores/types";
+import type { FrameSlotPosition, PhotoSlot } from "@/stores/types";
 
 type FrameLayoutProps = {
   frameId: string;
@@ -14,6 +14,7 @@ type FrameLayoutProps = {
   currentSlotIndex: number | null;
   onSlotClick: (index: number) => void;
   onRemove?: (index: number) => void;
+  slotPositions: FrameSlotPosition[];
 };
 
 const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
@@ -27,26 +28,17 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
       currentSlotIndex,
       onSlotClick,
       onRemove,
+      slotPositions,
     },
     ref
   ) => {
     const frameImageSrc = thumbnail;
     const { width, height } = frameSize;
     const sortedSlots = [...photoSlots].sort((a, b) => a.index - b.index);
+    const slotPositionMap = new Map(slotPositions.map((position) => [position.index, position]));
 
     const responsiveScaleClass =
       frameLayout === 1 ? "scale-[0.85] origin-top sm:scale-100" : "scale-100";
-
-    const innerFrameSectionStyle = (() => {
-      switch (frameLayout) {
-        case 1:
-          return "w-full h-full z-20 px-[14px] pt-[14px] pb-[90px] grid grid-rows-2 grid-cols-2 gap-[14px]";
-        case 2:
-          return "w-full h-full z-20 px-[10.5px] pt-[10.5px] pb-[76px] grid grid-cols-1 grid-rows-4 gap-[10.5px]";
-        default:
-          return ""; // No style for unsupported layouts
-      }
-    })();
 
     return (
       <div
@@ -58,8 +50,14 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
           style={{ width, height }}
         >
           {/* Photo Slots */}
-          <div className={`absolute inset-0 z-10 ${innerFrameSectionStyle} p-3`}>
+          <div className="absolute inset-0 z-10">
             {sortedSlots.map((slot) => {
+              const position = slotPositionMap.get(slot.index);
+
+              if (!position) {
+                return null;
+              }
+
               const shouldBypassOptimization =
                 !!slot.imageUrl &&
                 (slot.imageUrl.startsWith("blob:") || slot.imageUrl.startsWith("data:"));
@@ -67,8 +65,17 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
               return (
                 <div
                   key={slot.index}
-                  className={`relative  w-full h-full  overflow-hidden bg-white `}
+                  className={`absolute overflow-hidden bg-white shadow-sm transition-shadow ${
+                    slot.index === currentSlotIndex ? "ring-2 ring-[#ff6b5a]" : ""
+                  }`}
                   onClick={() => onSlotClick(slot.index)}
+                  style={{
+                    top: position.top,
+                    left: position.left,
+                    width: position.width,
+                    height: position.height,
+                    borderRadius: position.borderRadius,
+                  }}
                 >
                   {slot.imageUrl ? (
                     <Image
@@ -80,7 +87,9 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                     />
                   ) : (
                     <div
-                      className={` ${slot.index === currentSlotIndex ? "text-primary" : "text-gray-500"} flex items-center justify-center h-full`}
+                      className={`flex h-full w-full items-center justify-center text-xs font-medium ${
+                        slot.index === currentSlotIndex ? "text-[#ff6b5a]" : "text-gray-500"
+                      }`}
                     >
                       {slot.index === currentSlotIndex ? "Selected Slot" : "Empty Slot"}
                     </div>

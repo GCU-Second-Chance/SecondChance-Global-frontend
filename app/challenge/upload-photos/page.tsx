@@ -192,6 +192,7 @@ export default function UploadPhotosPage() {
           frameId={selectedFrame.id}
           thumbnail={selectedFrame.thumbnail}
           frameSize={selectedFrame.frameSize}
+          slotPositions={selectedFrame.slotPositions}
           photoSlots={photoSlots}
           currentSlotIndex={currentSlotIndex}
           onSlotClick={handleSlotClick}

@@ -190,6 +190,7 @@ Help this rescue dog find their second chance 💛
               frameId={selectedFrame.id}
               thumbnail={selectedFrame.thumbnail}
               frameSize={selectedFrame.frameSize}
+              slotPositions={selectedFrame.slotPositions}
             />
           </div>
         ) : (
