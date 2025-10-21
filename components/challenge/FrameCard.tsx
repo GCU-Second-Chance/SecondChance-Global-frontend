@@ -31,10 +31,11 @@ export default function FrameCard({ frame, isSelected, onSelect }: FrameCardProp
       {/* Frame Preview Image */}
       <div className="relative w-full h-48 overflow-hidden rounded-md">
         <Image
-          src={`/frames/${frame.id}.png`}
+          src={frame.thumbnail}
           alt={frame.name}
-          layout="fill"
-          objectFit="contain" // Ensure the image fits within the container
+          fill
+          className="object-contain"
+          sizes="(max-width: 640px) 100vw, 400px"
         />
       </div>
 

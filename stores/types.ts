@@ -15,6 +15,20 @@ export interface Frame {
   backgroundColor?: string;
   borderColor?: string;
   textColor?: string; // Text color for bottom text
+  frameSize: {
+    width: number;
+    height: number;
+  };
+  slotPositions: FrameSlotPosition[];
+}
+
+export interface FrameSlotPosition {
+  index: number;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  borderRadius?: number;
 }
 
 // Dog types

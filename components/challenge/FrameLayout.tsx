@@ -3,33 +3,36 @@ import Image from "next/image";
 import type { PhotoSlot } from "@/stores/types";
 
 type FrameLayoutProps = {
-  frameId?: string;
-  frameLayout?: number;
+  frameId: string;
+  frameLayout: number;
+  thumbnail: string;
+  frameSize: {
+    width: number;
+    height: number;
+  };
   photoSlots: PhotoSlot[];
   currentSlotIndex: number | null;
   onSlotClick: (index: number) => void;
   onRemove?: (index: number) => void;
-  thumbnail?: string;
 };
 
 const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
   (
-    { frameId, frameLayout, photoSlots, currentSlotIndex, onSlotClick, onRemove, thumbnail },
+    {
+      frameId,
+      frameLayout,
+      thumbnail,
+      frameSize,
+      photoSlots,
+      currentSlotIndex,
+      onSlotClick,
+      onRemove,
+    },
     ref
   ) => {
-    const frameImageSrc = thumbnail || `/frames/white-frame-${frameLayout}.png`;
+    const frameImageSrc = thumbnail;
+    const { width, height } = frameSize;
     const sortedSlots = [...photoSlots].sort((a, b) => a.index - b.index);
-
-    const frameLayoutStyle = (() => {
-      switch (frameLayout) {
-        case 1:
-          return "w-[400px] h-[600px]"; // Horizontal layout
-        case 2:
-          return "w-[200px] h-[600px]"; // Vertical layout
-        default:
-          return ""; // No style for unsupported layouts
-      }
-    })();
 
     const responsiveScaleClass =
       frameLayout === 1 ? "scale-[0.85] origin-top sm:scale-100" : "scale-100";
@@ -51,7 +54,8 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
       >
         <div
           ref={ref}
-          className={`relative  flex items-center justify-center ${frameLayoutStyle} `}
+          className="relative flex items-center justify-center"
+          style={{ width, height }}
         >
           {/* Photo Slots */}
           <div className={`absolute inset-0 z-10 ${innerFrameSectionStyle} p-3`}>
@@ -63,7 +67,7 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
               return (
                 <div
                   key={slot.index}
-                  className={`relative  w-full h-full rounded-md  overflow-hidden bg-white `}
+                  className={`relative  w-full h-full  overflow-hidden bg-white `}
                   onClick={() => onSlotClick(slot.index)}
                 >
                   {slot.imageUrl ? (

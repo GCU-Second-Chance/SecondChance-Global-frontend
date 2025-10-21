@@ -4,15 +4,20 @@ import type { PhotoSlot } from "@/stores/types";
 
 type FrameLayoutProps = {
   photos: PhotoSlot[];
-  frameLayout?: number;
-  frameId?: string;
-  thumbnail?: string;
+  frameLayout: number;
+  frameId: string;
+  thumbnail: string;
+  frameSize: {
+    width: number;
+    height: number;
+  };
 };
 
 const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
-  ({ photos, frameLayout, frameId, thumbnail }, ref) => {
-    const frameImageSrc = thumbnail || `/frames/white-frame-${frameLayout}.png`;
+  ({ photos, frameLayout, frameId, thumbnail, frameSize }, ref) => {
+    const frameImageSrc = thumbnail;
     const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
+    const { width, height } = frameSize;
 
     const frameLayoutStyle = (() => {
       switch (frameLayout) {
@@ -46,6 +51,7 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
         <div
           ref={ref}
           className={`relative  flex items-center justify-center ${frameLayoutStyle} `}
+          style={{ width, height }}
         >
           {/* Photo Slots */}
           <div className={`absolute inset-0 z-10 ${innerFrameSectionStyle} p-3`}>

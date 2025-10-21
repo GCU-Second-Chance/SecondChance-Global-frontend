@@ -189,6 +189,7 @@ Help this rescue dog find their second chance 💛
               frameLayout={selectedFrame.frameLayout}
               frameId={selectedFrame.id}
               thumbnail={selectedFrame.thumbnail}
+              frameSize={selectedFrame.frameSize}
             />
           </div>
         ) : (
