@@ -42,6 +42,14 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
                 return null;
               }
 
+              const computedStyle = {
+                top: `${(position.top / height) * 100}%`,
+                left: `${(position.left / width) * 100}%`,
+                width: `${(position.width / width) * 100}%`,
+                height: `${(position.height / height) * 100}%`,
+                borderRadius: position.borderRadius ?? 12,
+              };
+
               const shouldBypassOptimization =
                 !!slot.imageUrl &&
                 (slot.imageUrl.startsWith("blob:") || slot.imageUrl.startsWith("data:"));
@@ -50,20 +58,14 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
                 <div
                   key={slot.index}
                   className="absolute overflow-hidden bg-white"
-                  style={{
-                    top: position.top,
-                    left: position.left,
-                    width: position.width,
-                    height: position.height,
-                    borderRadius: position.borderRadius,
-                  }}
+                  style={computedStyle}
                 >
                   {slot.imageUrl && (
                     <Image
                       src={slot.imageUrl}
                       alt={`Photo slot ${slot.index}`}
                       fill
-                      className="object-cover "
+                      className="object-cover scale-x-[-1]"
                       unoptimized={shouldBypassOptimization}
                     />
                   )}
@@ -73,16 +75,15 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
           </div>
           {/* Frame PNG Overlay */}
           <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-            <div className="w-full h-full relative">
-              <Image
-                src={frameImageSrc}
-                alt={`Frame layout for ${frameId}`}
-                fill
-                style={{ objectFit: "contain" }}
-                className="pointer-events-none"
-                priority
-              />
-            </div>
+            <Image
+              src={frameImageSrc}
+              alt={`Frame layout for ${frameId}`}
+              width={width}
+              height={height}
+              style={{ objectFit: "contain" }}
+              className="pointer-events-none"
+              priority
+            />
           </div>
         </div>
       </div>

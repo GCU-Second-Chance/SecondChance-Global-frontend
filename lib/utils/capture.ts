@@ -64,15 +64,91 @@ export async function captureNodeToPng(
     })
   );
 
+  const restoreImages = await inlineImageSources(imgs);
+
   // 3) 레이아웃 안정화
   await new Promise((r) => requestAnimationFrame(() => r(null)));
 
-  // 4) 캡처
-  return await htmlToImage.toPng(node, {
-    pixelRatio, // 화질(픽셀 수) ↑
-    cacheBust: false,
-    style: { transform: "none" }, // 스케일·트랜스폼 제거
-    fetchRequestInit: { mode: "cors", credentials: "omit" },
-    filter: buildNodeFilter(excludeSelectors), // << 특정 요소 제외
-  });
+  try {
+    // 4) 캡처
+    return await htmlToImage.toPng(node, {
+      pixelRatio, // 화질(픽셀 수) ↑
+      cacheBust: false,
+      style: { transform: "none" }, // 스케일·트랜스폼 제거
+      fetchRequestInit: { mode: "cors", credentials: "omit" },
+      filter: buildNodeFilter(excludeSelectors), // << 특정 요소 제외
+    });
+  } finally {
+    restoreImages?.();
+  }
+}
+
+async function inlineImageSources(imgs: HTMLImageElement[]) {
+  const originals: Array<{ img: HTMLImageElement; src: string; srcset: string }> = [];
+
+  const toDataUrl = async (img: HTMLImageElement) => {
+    const src = img.currentSrc || img.src;
+    if (!src || src.startsWith("data:")) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(src, { mode: "cors", credentials: "omit" });
+      if (!response.ok) {
+        return null;
+      }
+
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error ?? new Error("Failed to read blob"));
+        reader.readAsDataURL(blob);
+      });
+
+      return dataUrl;
+    } catch (error) {
+      console.warn("[capture] Failed to inline image", { src: img.src, error });
+      return null;
+    }
+  };
+
+  await Promise.all(
+    imgs.map(async (img) => {
+      const inlinedSrc = await toDataUrl(img);
+      if (!inlinedSrc) {
+        return;
+      }
+
+      originals.push({
+        img,
+        src: img.getAttribute("src") ?? "",
+        srcset: img.getAttribute("srcset") ?? "",
+      });
+
+      img.setAttribute("srcset", "");
+      img.setAttribute("src", inlinedSrc);
+
+      if (!img.complete) {
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+        });
+      }
+    })
+  );
+
+  return () => {
+    originals.forEach(({ img, src, srcset }) => {
+      if (srcset) {
+        img.setAttribute("srcset", srcset);
+      } else {
+        img.removeAttribute("srcset");
+      }
+      if (src) {
+        img.setAttribute("src", src);
+      }
+    });
+  };
 }

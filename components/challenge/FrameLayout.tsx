@@ -21,7 +21,6 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
   (
     {
       frameId,
-      frameLayout,
       thumbnail,
       frameSize,
       photoSlots,
@@ -37,17 +36,15 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
     const sortedSlots = [...photoSlots].sort((a, b) => a.index - b.index);
     const slotPositionMap = new Map(slotPositions.map((position) => [position.index, position]));
 
-    const responsiveScaleClass =
-      frameLayout === 1 ? "scale-[0.85] origin-top sm:scale-100" : "scale-100";
-
     return (
-      <div
-        className={`flex bg-gray-100 items-center justify-center w-full py-4 ${responsiveScaleClass}`}
-      >
+      <div id="frame" className="flex w-full items-center justify-center bg-gray-100 py-4">
         <div
           ref={ref}
-          className="relative flex items-center justify-center"
-          style={{ width, height }}
+          className="relative w-full"
+          style={{
+            aspectRatio: `${width} / ${height}`,
+            maxWidth: `${width}px`,
+          }}
         >
           {/* Photo Slots */}
           <div className="absolute inset-0 z-10">
@@ -57,6 +54,14 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
               if (!position) {
                 return null;
               }
+
+              const computedStyle = {
+                top: `${(position.top / height) * 100}%`,
+                left: `${(position.left / width) * 100}%`,
+                width: `${(position.width / width) * 100}%`,
+                height: `${(position.height / height) * 100}%`,
+                borderRadius: position.borderRadius ?? 12,
+              };
 
               const shouldBypassOptimization =
                 !!slot.imageUrl &&
@@ -69,25 +74,19 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                     slot.index === currentSlotIndex ? "ring-2 ring-[#ff6b5a]" : ""
                   }`}
                   onClick={() => onSlotClick(slot.index)}
-                  style={{
-                    top: position.top,
-                    left: position.left,
-                    width: position.width,
-                    height: position.height,
-                    borderRadius: position.borderRadius,
-                  }}
+                  style={computedStyle}
                 >
                   {slot.imageUrl ? (
                     <Image
                       src={slot.imageUrl}
                       alt={`Photo slot ${slot.index}`}
                       fill
-                      className="object-cover "
+                      className="object-cover scale-x-[-1]"
                       unoptimized={shouldBypassOptimization}
                     />
                   ) : (
                     <div
-                      className={`flex h-full w-full items-center justify-center text-xs font-medium ${
+                      className={`flex h-full w-full items-center justify-center text-[10px] font-medium sm:text-xs ${
                         slot.index === currentSlotIndex ? "text-[#ff6b5a]" : "text-gray-500"
                       }`}
                     >
@@ -112,16 +111,15 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
           </div>
           {/* Frame PNG Overlay */}
           <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-            <div className="w-full h-full relative">
-              <Image
-                src={frameImageSrc}
-                alt={`Frame layout for ${frameId}`}
-                fill
-                style={{ objectFit: "contain" }}
-                className="pointer-events-none"
-                priority
-              />
-            </div>
+            <Image
+              src={frameImageSrc}
+              alt={`Frame layout for ${frameId}`}
+              fill
+              sizes={`(max-width: ${width}px) 100vw, ${width}px`}
+              style={{ objectFit: "contain" }}
+              className="pointer-events-none"
+              priority
+            />
           </div>
         </div>
       </div>

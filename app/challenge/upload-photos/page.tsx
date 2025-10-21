@@ -5,7 +5,7 @@
  * Upload or capture user photos for the challenge
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Camera } from "lucide-react";
@@ -36,6 +36,18 @@ export default function UploadPhotosPage() {
   const [isGeneratingResult, setIsGeneratingResult] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const activeSlotPosition =
+    selectedFrame && currentSlotIndex !== null
+      ? selectedFrame.slotPositions.find((slot) => slot.index === currentSlotIndex)
+      : undefined;
+
+  const cameraSafeAreaAspectRatio = useMemo(() => {
+    if (!activeSlotPosition || !activeSlotPosition.height) {
+      return undefined;
+    }
+
+    return activeSlotPosition.width / activeSlotPosition.height;
+  }, [activeSlotPosition]);
 
   // Redirect if prerequisites not met
   useEffect(() => {
@@ -277,7 +289,11 @@ export default function UploadPhotosPage() {
         </ul>
       </div>
       {isCameraOpen && (
-        <CameraCapture onCapture={handleCameraCapture} onClose={() => setIsCameraOpen(false)} />
+        <CameraCapture
+          onCapture={handleCameraCapture}
+          onClose={() => setIsCameraOpen(false)}
+          safeAreaAspectRatio={cameraSafeAreaAspectRatio}
+        />
       )}
     </div>
   );

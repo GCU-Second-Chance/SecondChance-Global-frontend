@@ -5,14 +5,53 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useChallengeStore } from "@/stores";
 
+type StepConfig = {
+  step: 1 | 2 | 3 | 4;
+  title: string;
+  subtitle: string;
+  path: string;
+};
+
+const STEP_CONFIG: StepConfig[] = [
+  {
+    step: 1,
+    title: "Choose Your Frame",
+    subtitle: "Pick the layout that best fits your story",
+    path: "/challenge/select-frame",
+  },
+  {
+    step: 2,
+    title: "Meet Your Match",
+    subtitle: "Swipe through rescue dogs and pick your partner",
+    path: "/challenge/match-dog",
+  },
+  {
+    step: 3,
+    title: "Add Your Photos",
+    subtitle: "Upload or snap pictures to complete the collage",
+    path: "/challenge/upload-photos",
+  },
+  {
+    step: 4,
+    title: "Share & Celebrate",
+    subtitle: "Review the final collage and spread the word",
+    path: "/challenge/result",
+  },
+];
+
 export default function ChallengeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { step, reset } = useChallengeStore();
+  const { step, reset, previousStep } = useChallengeStore();
+
+  const stepConfig = useMemo(
+    () => (STEP_CONFIG.find((item) => item.step === step) ?? STEP_CONFIG[0]) as StepConfig,
+    [step]
+  );
 
   // Auto-save to localStorage (handled by Zustand persist middleware)
 
@@ -32,9 +71,14 @@ export default function ChallengeLayout({ children }: { children: React.ReactNod
 
   const handleBack = () => {
     if (step > 1) {
-      router.back();
+      const targetStep = (step - 1) as 1 | 2 | 3 | 4;
+      previousStep();
+      const targetRoute =
+        STEP_CONFIG.find((config) => config.step === targetStep)?.path || "/challenge";
+      router.push(targetRoute);
     } else {
-      router.push("/");
+      reset();
+      router.push("/challenge");
     }
   };
 
@@ -85,7 +129,13 @@ export default function ChallengeLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Step Label */}
-          <div className="mt-3 text-center text-sm text-gray-600">Step {step} of 4</div>
+          <div className="mt-4 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#ff6b5a]">
+              Step {step} of 4
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-gray-900">{stepConfig.title}</h2>
+            <p className="mt-1 text-xs text-gray-500">{stepConfig.subtitle}</p>
+          </div>
         </div>
       </header>
 

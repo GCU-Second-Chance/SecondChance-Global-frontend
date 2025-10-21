@@ -1,24 +1,46 @@
 /**
  * Dog Matching Page (Step 2)
- * Random dog matching with reroll functionality
+ * Carousel view with batched dog loading
  */
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useChallengeStore } from "@/stores";
-import DogCard, { DogCardSkeleton } from "@/components/challenge/DogCard";
-import { getRandomDog } from "@/data/dogs";
+import DogCarousel from "@/components/challenge/DogCarousel";
+import { useDogBatch } from "@/lib/react-query/hooks";
 import type { Dog } from "@/stores/types";
 import { logDogMatched } from "@/lib/analytics";
+import { AlertTriangle } from "lucide-react";
+
+const BATCH_SIZE = 30;
+
+function shuffleDogs(dogs: Dog[]): Dog[] {
+  const copy = [...dogs];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = copy[i]!;
+    copy[i] = copy[j]!;
+    copy[j] = temp;
+  }
+  return copy;
+}
 
 export default function MatchDogPage() {
   const router = useRouter();
   const { selectedFrame, matchDog, goToStep, nextStep } = useChallengeStore();
-  const [currentDog, setCurrentDog] = useState<Dog | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRerolling, setIsRerolling] = useState(false);
+
+  const [batchOffset, setBatchOffset] = useState(0);
+  const [seed, setSeed] = useState(() => `${Date.now()}`);
+  const [orderedDogs, setOrderedDogs] = useState<Dog[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const { data, isLoading, isFetching, isError } = useDogBatch({
+    limit: BATCH_SIZE,
+    offset: batchOffset,
+    seed,
+  });
 
   // Redirect if no frame selected
   useEffect(() => {
@@ -27,91 +49,151 @@ export default function MatchDogPage() {
     }
   }, [selectedFrame, router]);
 
-  // Load initial random dog
+  // Update local dog order whenever a new batch arrives
   useEffect(() => {
-    if (selectedFrame) {
-      const randomDog = getRandomDog();
-      setCurrentDog(randomDog);
-      setIsLoading(false);
+    if (data?.dogs?.length) {
+      const shuffled = shuffleDogs(data.dogs);
+      setOrderedDogs(shuffled);
+      setActiveIndex(shuffled.length > 2 ? 1 : 0);
     }
-  }, [selectedFrame]);
+  }, [data]);
 
-  const handleReroll = () => {
-    setIsRerolling(true);
+  const currentDog = orderedDogs[activeIndex] ?? null;
+  const viewedInBatch = Math.min(activeIndex + 1, orderedDogs.length);
+  const displayedCount = batchOffset + viewedInBatch;
 
-    // Simulate API delay
-    setTimeout(() => {
-      const randomDog = getRandomDog();
-      setCurrentDog(randomDog);
-      setIsRerolling(false);
-    }, 500);
+  const isInitialLoading = isLoading && orderedDogs.length === 0;
+  const isProcessingSelection = isFetching && orderedDogs.length > 0;
+
+  const handleNext = () => {
+    if (orderedDogs.length === 0 || isProcessingSelection) {
+      return;
+    }
+
+    if (activeIndex < orderedDogs.length - 1) {
+      setActiveIndex((index) => index + 1);
+      return;
+    }
+
+    if (data?.meta?.hasMore) {
+      setOrderedDogs([]);
+      setActiveIndex(0);
+      setBatchOffset((offset) => offset + BATCH_SIZE);
+      return;
+    }
+
+    // No more data; start a fresh randomized cycle
+    setOrderedDogs([]);
+    setActiveIndex(0);
+    setSeed(`${Date.now()}`);
+    setBatchOffset(0);
+  };
+
+  const handlePrevious = () => {
+    if (activeIndex === 0 || orderedDogs.length === 0 || isProcessingSelection) {
+      return;
+    }
+    setActiveIndex((index) => index - 1);
   };
 
   const handleSelectDog = () => {
     if (!currentDog) return;
 
-    // Update Zustand store
     matchDog(currentDog);
-
-    // Log analytics event
     logDogMatched(currentDog.id, currentDog.name, "random");
 
-    // Move to step 2 and navigate to upload photos
     goToStep(2);
-    nextStep(); // This will set step to 3
+    nextStep();
     router.push("/challenge/upload-photos");
   };
+
+  const subtitle = useMemo(() => {
+    if (isInitialLoading) {
+      return "Gathering the sweetest faces for you...";
+    }
+    if (currentDog) {
+      return `Swipe to meet ${currentDog.name} and their friends`;
+    }
+    return "Unable to load new dogs right now. Please try again.";
+  }, [currentDog, isInitialLoading]);
 
   if (!selectedFrame) {
     return null;
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
+    <div className="container mx-auto max-w-5xl px-4 py-8">
       {/* Header */}
-      <div className="mb-8 text-center">
+      <div className="mb-10 text-center">
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Meet Your Match</h1>
-        <p className="text-gray-600">
-          This rescue dog is waiting for their second chance. Will you help share their story?
-        </p>
+        <p className="text-gray-600">{subtitle}</p>
+
+        <div className="mt-4 inline-flex items-center gap-3 rounded-full bg-[#fff1ec] px-4 py-2 text-sm font-semibold text-[#ff6b5a]">
+          <span>{displayedCount}</span>
+          <span>dogs discovered</span>
+        </div>
       </div>
 
-      {/* Dog Card */}
-      <div className="mb-8">
-        {isLoading || isRerolling ? (
-          <DogCardSkeleton />
-        ) : currentDog ? (
-          <DogCard
-            dog={currentDog}
+      {/* Carousel */}
+      <div className="mb-10">
+        {isInitialLoading ? (
+          <CarouselSkeleton />
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-600">
+            <AlertTriangle className="h-10 w-10 text-[#ff6b5a]" />
+            <p>We couldn&apos;t fetch new rescue dogs right now.</p>
+            <p>Please try again in a moment.</p>
+          </div>
+        ) : orderedDogs.length > 0 ? (
+          <DogCarousel
+            dogs={orderedDogs}
+            activeIndex={activeIndex}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
             onSelect={handleSelectDog}
-            onReroll={handleReroll}
-            isLoading={isRerolling}
+            isProcessing={isProcessingSelection}
           />
         ) : (
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center text-gray-500">
-            No dogs available at the moment. Please try again later.
-          </div>
+          <CarouselSkeleton />
         )}
       </div>
 
       {/* Info Box */}
-      <div className="rounded-lg bg-[#fff9f3] p-6">
-        <h3 className="mb-2 font-semibold text-gray-900">What happens next?</h3>
+      <div className="rounded-2xl bg-[#fff9f3] p-6">
+        <h3 className="mb-3 text-lg font-semibold text-gray-900">What happens next?</h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
-            <span>You&apos;ll take 3 photos with this dog&apos;s image</span>
+            <span>Swipe through the rescue spotlight to find the perfect companion.</span>
           </li>
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
-            <span>Create a beautiful photo frame to share on social media</span>
+            <span>We&apos;ll help you craft a shareable frame that features them beautifully.</span>
           </li>
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
-            <span>Help {currentDog?.name || "this dog"} find a forever home!</span>
+            <span>
+              Every share increases the chance that {currentDog?.name || "this pup"} finds a loving
+              home.
+            </span>
           </li>
         </ul>
       </div>
+    </div>
+  );
+}
+
+function CarouselSkeleton() {
+  return (
+    <div className="flex w-full items-center justify-center gap-5 px-4">
+      {[0, 1, 2].map((index) => (
+        <div
+          key={index}
+          className={`h-[420px] w-[260px] animate-pulse rounded-3xl bg-gray-200 ${
+            index === 1 ? "h-[470px] w-[320px]" : ""
+          }`}
+        />
+      ))}
     </div>
   );
 }

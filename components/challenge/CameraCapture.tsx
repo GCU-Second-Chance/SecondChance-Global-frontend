@@ -5,19 +5,25 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+// eslint-disable-next-line sort-imports
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Camera, RotateCw, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface CameraCaptureProps {
   onCapture: (file: File) => void;
   onClose: () => void;
+  safeAreaAspectRatio?: number;
 }
 
 type CameraState = "idle" | "requesting" | "active" | "error";
 type FacingMode = "user" | "environment";
 
-export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
+export default function CameraCapture({
+  onCapture,
+  onClose,
+  safeAreaAspectRatio,
+}: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -27,6 +33,22 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
   const [facingMode, setFacingMode] = useState<FacingMode>("user");
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
+
+  const safeAreaStyles = useMemo<CSSProperties | undefined>(() => {
+    if (!safeAreaAspectRatio || Number.isNaN(safeAreaAspectRatio) || safeAreaAspectRatio <= 0) {
+      return undefined;
+    }
+
+    const ratio = Number.isFinite(safeAreaAspectRatio) ? safeAreaAspectRatio : 1;
+    const fixedRatio = Number(ratio.toFixed(6));
+
+    return {
+      aspectRatio: `${fixedRatio}`,
+      width: `min(100vw, calc(100vh * ${fixedRatio}))`,
+      maxWidth: "100vw",
+      maxHeight: "100vh",
+    } satisfies CSSProperties;
+  }, [safeAreaAspectRatio]);
 
   // Request camera permission and start stream
   const startCamera = async (facing: FacingMode = "user") => {
@@ -147,12 +169,48 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
 
     if (!context) return;
 
-    // Set canvas size to video size
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
 
-    // Draw video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (!videoWidth || !videoHeight) {
+      return;
+    }
+
+    let sourceWidth = videoWidth;
+    let sourceHeight = videoHeight;
+    let sourceX = 0;
+    let sourceY = 0;
+
+    if (safeAreaAspectRatio && safeAreaAspectRatio > 0) {
+      const videoAspect = videoWidth / videoHeight;
+
+      if (videoAspect > safeAreaAspectRatio) {
+        // Video is wider than safe area -> crop sides
+        sourceHeight = videoHeight;
+        sourceWidth = videoHeight * safeAreaAspectRatio;
+        sourceX = (videoWidth - sourceWidth) / 2;
+      } else {
+        // Video is taller than safe area -> crop top & bottom
+        sourceWidth = videoWidth;
+        sourceHeight = videoWidth / safeAreaAspectRatio;
+        sourceY = (videoHeight - sourceHeight) / 2;
+      }
+    }
+
+    canvas.width = sourceWidth;
+    canvas.height = sourceHeight;
+
+    context.drawImage(
+      video,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      sourceWidth,
+      sourceHeight
+    );
 
     // Convert canvas to blob
     canvas.toBlob(
@@ -246,6 +304,24 @@ export default function CameraCapture({ onCapture, onClose }: CameraCaptureProps
               >
                 Try Again
               </button>
+            </div>
+          )}
+
+          {/* Safe Area Overlay */}
+          {cameraState === "active" && isVideoReady && safeAreaStyles && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div
+                className="relative overflow-hidden rounded-[32px] border-2 border-white/80 backdrop-blur-[1px]"
+                style={{
+                  ...safeAreaStyles,
+                  boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.45)",
+                }}
+              >
+                <div className="pointer-events-none absolute inset-4 rounded-[28px] border border-white/35" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center text-sm font-medium text-white/80">
+                  Center yourself within the frame
+                </div>
+              </div>
             </div>
           )}
         </div>

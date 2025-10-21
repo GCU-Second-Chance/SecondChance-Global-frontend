@@ -1,5 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { fetchDogById, fetchRandomDog, uploadChallengePhotos } from "@/lib/api/dogs";
+import {
+  fetchDogById,
+  fetchDogs,
+  fetchRandomDog,
+  uploadChallengePhotos,
+} from "@/lib/api/dogs";
+import type { DogListResult, FetchDogsOptions } from "@/lib/api/dogs";
 import type { Dog } from "@/stores/types";
 
 /**
@@ -7,9 +13,26 @@ import type { Dog } from "@/stores/types";
  */
 export const dogKeys = {
   all: ["dogs"] as const,
+  list: (limit: number, offset: number, seed: string | null = null) =>
+    [...dogKeys.all, "list", limit, offset, seed] as const,
   detail: (id: string) => [...dogKeys.all, "detail", id] as const,
   random: () => [...dogKeys.all, "random"] as const,
 };
+
+/**
+ * Hook: Fetch list of dogs (batched for carousel)
+ */
+export function useDogBatch(options: FetchDogsOptions = {}) {
+  const { limit = 30, offset = 0, seed = null } = options;
+
+  return useQuery<DogListResult, Error>({
+    queryKey: dogKeys.list(limit, offset, seed),
+    queryFn: () => fetchDogs({ limit, offset, seed: seed ?? undefined }),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes cache retention
+    retry: 2,
+  });
+}
 
 /**
  * Hook: Fetch dog by ID
