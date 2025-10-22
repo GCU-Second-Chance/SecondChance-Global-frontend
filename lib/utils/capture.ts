@@ -1,5 +1,5 @@
 // utils/capture.ts
-import * as htmlToImage from "html-to-image";
+import html2canvas from "html2canvas";
 
 export type CaptureOptions = {
   /** 캡처에서 제외할 셀렉터들(예: ['#remove', '.debug', '[data-no-capture]']) */
@@ -30,6 +30,7 @@ export async function captureNodeToPng(
   const {
     excludeSelectors = [], // << 여기로 '#remove' 넣으면 됨
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2),
+    backgroundColor = "#fff",
   } = opts;
 
   // 1) 폰트 준비
@@ -70,17 +71,34 @@ export async function captureNodeToPng(
   await new Promise((r) => requestAnimationFrame(() => r(null)));
 
   try {
-    // 4) 캡처
-    return await htmlToImage.toPng(node, {
-      pixelRatio, // 화질(픽셀 수) ↑
-      cacheBust: false,
-      style: { transform: "none" }, // 스케일·트랜스폼 제거
-      fetchRequestInit: { mode: "cors", credentials: "omit" },
-      filter: buildNodeFilter(excludeSelectors), // << 특정 요소 제외
+    // 4) 캡처 (html2canvas 고정)
+    const canvas = await html2canvas(node, {
+      backgroundColor: backgroundColor === null ? null : backgroundColor,
+      useCORS: true,
+      allowTaint: true,
+      scale: pixelRatio,
+      logging: false,
+      // 제외 요소 무시
+      ignoreElements: buildIgnoreElements(excludeSelectors),
+      scrollX: 0,
+      scrollY: 0,
     });
+
+    return canvas.toDataURL("image/png");
   } finally {
     restoreImages?.();
   }
+}
+
+function buildIgnoreElements(excludeSelectors: string[] = []) {
+  if (excludeSelectors.length === 0) return undefined;
+  return (el: Element) => {
+    const node = el as HTMLElement;
+    for (const sel of excludeSelectors) {
+      if (node.matches?.(sel) || node.closest?.(sel)) return true; // true => 무시
+    }
+    return false;
+  };
 }
 
 async function inlineImageSources(imgs: HTMLImageElement[]) {
