@@ -25,14 +25,24 @@ export async function fetcher<T = unknown>(url: string, options: FetcherOptions 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+  // Build headers without forcing Content-Type for GET or FormData
+  const headers: HeadersInit = { ...(fetchOptions.headers ?? {}) };
+  const method = (fetchOptions.method || "GET").toUpperCase();
+  const hasBody = typeof fetchOptions.body !== "undefined" && fetchOptions.body !== null;
+  const isFormData =
+    hasBody && typeof FormData !== "undefined" && fetchOptions.body instanceof FormData;
+
+  if (hasBody && !isFormData && (method === "POST" || method === "PUT" || method === "PATCH")) {
+    if (!("Content-Type" in (headers as Record<string, string>))) {
+      (headers as Record<string, string>)["Content-Type"] = "application/json";
+    }
+  }
+
   try {
     const response = await fetch(url, {
       ...fetchOptions,
       signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        ...fetchOptions.headers,
-      },
+      headers,
     });
 
     clearTimeout(timeoutId);

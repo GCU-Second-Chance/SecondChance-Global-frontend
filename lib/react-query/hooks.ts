@@ -13,9 +13,11 @@ import type { Dog } from "@/stores/types";
  */
 export const dogKeys = {
   all: ["dogs"] as const,
-  list: (limit: number, offset: number, seed: string | null = null) =>
-    [...dogKeys.all, "list", limit, offset, seed] as const,
-  detail: (id: string) => [...dogKeys.all, "detail", id] as const,
+  list: (limit: number, offset: number) => [...dogKeys.all, "list", limit, offset] as const,
+  detail: (id: string, country?: string) =>
+    (country
+      ? [...dogKeys.all, "detail", id, country]
+      : [...dogKeys.all, "detail", id]) as const,
   random: () => [...dogKeys.all, "random"] as const,
 };
 
@@ -23,11 +25,11 @@ export const dogKeys = {
  * Hook: Fetch list of dogs (batched for carousel)
  */
 export function useDogBatch(options: FetchDogsOptions = {}) {
-  const { limit = 30, offset = 0, seed = null } = options;
+  const { limit = 30, offset = 0 } = options;
 
   return useQuery<DogListResult, Error>({
-    queryKey: dogKeys.list(limit, offset, seed),
-    queryFn: () => fetchDogs({ limit, offset, seed: seed ?? undefined }),
+    queryKey: dogKeys.list(limit, offset),
+    queryFn: () => fetchDogs({ limit, offset }),
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes cache retention
     retry: 2,
@@ -37,10 +39,10 @@ export function useDogBatch(options: FetchDogsOptions = {}) {
 /**
  * Hook: Fetch dog by ID
  */
-export function useDog(id: string) {
+export function useDog(id: string, country?: string) {
   return useQuery<Dog, Error>({
-    queryKey: dogKeys.detail(id),
-    queryFn: () => fetchDogById(id),
+    queryKey: dogKeys.detail(id, country),
+    queryFn: () => fetchDogById(id, country),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 3,
   });

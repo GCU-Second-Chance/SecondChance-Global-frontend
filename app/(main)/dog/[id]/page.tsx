@@ -15,6 +15,22 @@ import { getDogById } from "@/data/dogs";
 import type { Dog } from "@/stores/types";
 import { logChallengeConversion, logDogShared, logQRScanned } from "@/lib/analytics";
 
+function getAgeDisplay(age: Dog["age"]): string {
+  if (typeof age === "number") {
+    return `${age} year${age === 1 ? "" : "s"} old`;
+  }
+
+  return String(age);
+}
+
+function getAgeDescriptor(age: Dog["age"]): string {
+  if (typeof age === "number") {
+    return `${age}-year-old`;
+  }
+
+  return `${String(age).toLowerCase()}`;
+}
+
 interface DogDetailPageProps {
   params: Promise<{ id: string }>;
 }
@@ -49,7 +65,8 @@ export default function DogDetailPage({ params }: DogDetailPageProps) {
     if (!dog) return;
 
     const url = window.location.href;
-    const shareText = `🐾 Meet ${dog.name}! This ${dog.age}-year-old rescue dog is looking for a loving home.
+    const ageDescriptor = getAgeDescriptor(dog.age);
+    const shareText = `🐾 Meet ${dog.name}! This ${ageDescriptor} rescue dog is looking for a loving home.
 
 📍 ${dog.location.city}, ${dog.location.country}
 🏠 ${dog.shelter.name}
@@ -191,7 +208,7 @@ Help ${dog.name} find their forever home! #SecondChanceGlobal #AdoptDontShop`;
             <div className="flex flex-wrap gap-4 text-gray-600">
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                {dog.age} year{dog.age !== 1 ? "s" : ""} old
+                {getAgeDisplay(dog.age)}
               </span>
               <span>•</span>
               <span className="capitalize">{dog.gender}</span>
@@ -278,14 +295,16 @@ Help ${dog.name} find their forever home! #SecondChanceGlobal #AdoptDontShop`;
         </motion.div>
 
         {/* Added Date */}
-        <motion.div
-          className="mt-6 text-center text-sm text-gray-500"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          Listed on {new Date(dog.createdAt).toLocaleDateString()}
-        </motion.div>
+        {dog.createdAt && (
+          <motion.div
+            className="mt-6 text-center text-sm text-gray-500"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            Listed on {new Date(dog.createdAt).toLocaleDateString()}
+          </motion.div>
+        )}
       </div>
     </div>
   );

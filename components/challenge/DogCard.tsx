@@ -18,6 +18,13 @@ interface DogCardProps {
 }
 
 export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardProps) {
+  const ageDisplay =
+    typeof dog.age === "number"
+      ? `${dog.age} year${dog.age === 1 ? "" : "s"} old`
+      : dog.age;
+  const genderDisplay =
+    dog.gender === "male" ? "Male" : dog.gender === "female" ? "Female" : "Unknown";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -48,8 +55,7 @@ export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardP
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-gray-900">{dog.name}</h2>
           <p className="text-sm text-gray-600">
-            {dog.age} year{dog.age !== 1 ? "s" : ""} old •{" "}
-            {dog.gender === "male" ? "Male" : "Female"}
+            {ageDisplay} • {genderDisplay}
           </p>
         </div>
 
@@ -100,10 +106,12 @@ export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardP
         </div>
 
         {/* Added Date */}
-        <div className="mt-4 flex items-center justify-center gap-1 text-xs text-gray-500">
-          <Calendar className="h-3 w-3" />
-          <span>Added {new Date(dog.createdAt).toLocaleDateString()}</span>
-        </div>
+        {dog.createdAt && (
+          <div className="mt-4 flex items-center justify-center gap-1 text-xs text-gray-500">
+            <Calendar className="h-3 w-3" />
+            <span>Added {new Date(dog.createdAt).toLocaleDateString()}</span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

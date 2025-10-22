@@ -36,8 +36,9 @@ export interface Dog {
   id: string;
   images: string[];
   name: string;
-  age: number;
-  gender: "male" | "female";
+  age: number | string;
+  ageRange?: "baby" | "young" | "adult" | "senior";
+  gender: "male" | "female" | "unknown";
   breed?: string;
   location: {
     country: string;
@@ -48,7 +49,8 @@ export interface Dog {
     contact: string;
     email?: string;
   };
-  createdAt: string;
+  createdAt?: string;
+  origin?: string;
 }
 
 // Photo slot types

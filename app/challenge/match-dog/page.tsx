@@ -14,8 +14,6 @@ import type { Dog } from "@/stores/types";
 import { logDogMatched } from "@/lib/analytics";
 import { AlertTriangle } from "lucide-react";
 
-const BATCH_SIZE = 30;
-
 function shuffleDogs(dogs: Dog[]): Dog[] {
   const copy = [...dogs];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -30,17 +28,11 @@ function shuffleDogs(dogs: Dog[]): Dog[] {
 export default function MatchDogPage() {
   const router = useRouter();
   const { selectedFrame, matchDog, goToStep, nextStep } = useChallengeStore();
+  const [buffer, setBuffer] = useState<Dog[]>([]); // full batch (~30)
+  const [windowStart, setWindowStart] = useState(0); // 0,3,6...
+  const [activeIndex, setActiveIndex] = useState(1); // index within the 3-card window
 
-  const [batchOffset, setBatchOffset] = useState(0);
-  const [seed, setSeed] = useState(() => `${Date.now()}`);
-  const [orderedDogs, setOrderedDogs] = useState<Dog[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const { data, isLoading, isFetching, isError } = useDogBatch({
-    limit: BATCH_SIZE,
-    offset: batchOffset,
-    seed,
-  });
+  const { data, isLoading, isFetching, isError, refetch } = useDogBatch();
 
   // Redirect if no frame selected
   useEffect(() => {
@@ -53,47 +45,61 @@ export default function MatchDogPage() {
   useEffect(() => {
     if (data?.dogs?.length) {
       const shuffled = shuffleDogs(data.dogs);
-      setOrderedDogs(shuffled);
+      setBuffer(shuffled);
+      setWindowStart(0);
       setActiveIndex(shuffled.length > 2 ? 1 : 0);
     }
   }, [data]);
 
-  const currentDog = orderedDogs[activeIndex] ?? null;
-  const viewedInBatch = Math.min(activeIndex + 1, orderedDogs.length);
-  const displayedCount = batchOffset + viewedInBatch;
+  const visible = useMemo(() => buffer.slice(windowStart, windowStart + 3), [buffer, windowStart]);
+  const currentDog = visible[activeIndex] ?? null;
+  const displayedCount = Math.min(windowStart + activeIndex + 1, buffer.length);
 
-  const isInitialLoading = isLoading && orderedDogs.length === 0;
-  const isProcessingSelection = isFetching && orderedDogs.length > 0;
+  const isInitialLoading = isLoading && buffer.length === 0;
+  const isProcessingSelection = isFetching && buffer.length > 0;
 
-  const handleNext = () => {
-    if (orderedDogs.length === 0 || isProcessingSelection) {
+  const handleNext = async () => {
+    if (visible.length === 0 || isProcessingSelection) return;
+
+    // Move within the 3-card window first
+    if (activeIndex < visible.length - 1) {
+      setActiveIndex((idx) => idx + 1);
       return;
     }
 
-    if (activeIndex < orderedDogs.length - 1) {
-      setActiveIndex((index) => index + 1);
+    // Advance to next window of 3, if available in buffer
+    if (windowStart + 3 < buffer.length) {
+      const nextStart = windowStart + 3;
+      setWindowStart(nextStart);
+      const nextLen = buffer.slice(nextStart, nextStart + 3).length;
+      setActiveIndex(nextLen > 2 ? 1 : 0);
       return;
     }
 
-    if (data?.meta?.hasMore) {
-      setOrderedDogs([]);
-      setActiveIndex(0);
-      setBatchOffset((offset) => offset + BATCH_SIZE);
-      return;
-    }
-
-    // No more data; start a fresh randomized cycle
-    setOrderedDogs([]);
-    setActiveIndex(0);
-    setSeed(`${Date.now()}`);
-    setBatchOffset(0);
+    // Exhausted the batch: refetch a fresh ~30 and reset
+    const res = await refetch();
+    const list = res.data?.dogs ?? [];
+    const shuffled = shuffleDogs(list);
+    setBuffer(shuffled);
+    setWindowStart(0);
+    setActiveIndex(shuffled.length > 2 ? 1 : 0);
   };
 
   const handlePrevious = () => {
-    if (activeIndex === 0 || orderedDogs.length === 0 || isProcessingSelection) {
+    if (visible.length === 0 || isProcessingSelection) return;
+
+    if (activeIndex > 0) {
+      setActiveIndex((idx) => idx - 1);
       return;
     }
-    setActiveIndex((index) => index - 1);
+
+    if (windowStart - 3 >= 0) {
+      const prevStart = windowStart - 3;
+      setWindowStart(prevStart);
+      const prevLen = buffer.slice(prevStart, prevStart + 3).length;
+      // jump to end of previous window (middle if 3 exists, else clamp)
+      setActiveIndex(prevLen > 2 ? 2 : Math.max(0, prevLen - 1));
+    }
   };
 
   const handleSelectDog = () => {
@@ -144,9 +150,9 @@ export default function MatchDogPage() {
             <p>We couldn&apos;t fetch new rescue dogs right now.</p>
             <p>Please try again in a moment.</p>
           </div>
-        ) : orderedDogs.length > 0 ? (
+        ) : visible.length > 0 ? (
           <DogCarousel
-            dogs={orderedDogs}
+            dogs={visible}
             activeIndex={activeIndex}
             onNext={handleNext}
             onPrevious={handlePrevious}

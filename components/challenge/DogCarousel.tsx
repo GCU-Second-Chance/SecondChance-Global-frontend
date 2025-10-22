@@ -1,9 +1,14 @@
 "use client";
 
-import { motion, type PanInfo } from "framer-motion";
 import Image from "next/image";
 import type { Dog } from "@/stores/types";
 import { ChevronLeft, ChevronRight, Heart, MapPin } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { EffectCards } from "swiper/modules";
+import { useEffect, useRef } from "react";
+
+import "swiper/css";
+import "swiper/css/effect-cards";
 
 interface DogCarouselProps {
   dogs: Dog[];
@@ -14,10 +19,6 @@ interface DogCarouselProps {
   isProcessing?: boolean;
 }
 
-type CarouselPosition = "previous" | "current" | "next";
-
-const SWIPE_THRESHOLD = 100;
-
 export default function DogCarousel({
   dogs,
   activeIndex,
@@ -26,45 +27,59 @@ export default function DogCarousel({
   onSelect,
   isProcessing = false,
 }: DogCarouselProps) {
-  const currentDog = dogs[activeIndex];
-  const previousDog = activeIndex > 0 ? dogs[activeIndex - 1] ?? null : null;
-  const nextDog = activeIndex < dogs.length - 1 ? dogs[activeIndex + 1] ?? null : null;
+  const swiperRef = useRef<any>(null);
+  const syncingRef = useRef(false);
 
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x < -SWIPE_THRESHOLD && nextDog) {
-      onNext();
-    } else if (info.offset.x > SWIPE_THRESHOLD && previousDog) {
-      onPrevious();
+  // Keep Swiper in sync with parent-provided activeIndex
+  useEffect(() => {
+    const swiper = swiperRef.current?.swiper;
+    if (swiper && typeof activeIndex === "number" && swiper.activeIndex !== activeIndex) {
+      // Guard against feedback loop: mark as syncing while we imperatively update Swiper
+      syncingRef.current = true;
+      swiper.slideTo(activeIndex, 0);
+      // Release the lock on next tick after Swiper processes the change
+      setTimeout(() => {
+        syncingRef.current = false;
+      }, 0);
     }
-  };
+  }, [activeIndex]);
 
-  if (!currentDog) {
-    return null;
-  }
+  if (!dogs.length) return null;
 
   return (
     <div className="relative mx-auto w-full max-w-5xl">
-      <motion.div
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
-        onDragEnd={handleDragEnd}
-        className="flex w-full items-center justify-center gap-5 px-4"
+      <Swiper
+        ref={swiperRef}
+        effect="cards"
+        grabCursor
+        modules={[EffectCards]}
+        cardsEffect={{ slideShadows: false }}
+        onSlideNextTransitionEnd={() => {
+          if (syncingRef.current) return;
+          onNext();
+        }}
+        onSlidePrevTransitionEnd={() => {
+          if (syncingRef.current) return;
+          onPrevious();
+        }}
+        initialSlide={activeIndex}
       >
-        <CarouselCard dog={previousDog} position="previous" />
-        <CarouselCard
-          dog={currentDog}
-          position="current"
-          onSelect={() => onSelect(currentDog)}
-          disableActions={isProcessing}
-        />
-        <CarouselCard dog={nextDog} position="next" />
-      </motion.div>
+        {dogs.map((dog, index) => (
+          <SwiperSlide key={dog.id} style={{ padding: "2em" }}>
+            <DogSlide
+              dog={dog}
+              isCurrent={index === activeIndex}
+              onSelect={() => onSelect(dog)}
+              disableActions={isProcessing}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
       <button
         type="button"
-        onClick={onPrevious}
-        disabled={!previousDog}
+        onClick={() => swiperRef.current?.swiper?.slidePrev()}
+        disabled={isProcessing}
         aria-label="View previous dog"
         className="absolute left-2 top-1/2 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white p-3 text-gray-600 shadow-md transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 md:inline-flex"
       >
@@ -72,8 +87,8 @@ export default function DogCarousel({
       </button>
       <button
         type="button"
-        onClick={onNext}
-        disabled={!nextDog}
+        onClick={() => swiperRef.current?.swiper?.slideNext()}
+        disabled={isProcessing}
         aria-label="View next dog"
         className="absolute right-2 top-1/2 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white p-3 text-gray-600 shadow-md transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 md:inline-flex"
       >
@@ -94,26 +109,26 @@ export default function DogCarousel({
   );
 }
 
-interface CarouselCardProps {
-  dog: Dog | null;
-  position: CarouselPosition;
-  onSelect?: () => void;
+function DogSlide({
+  dog,
+  isCurrent,
+  onSelect,
+  disableActions,
+}: {
+  dog: Dog;
+  isCurrent: boolean;
+  onSelect: () => void;
   disableActions?: boolean;
-}
-
-function CarouselCard({ dog, position, onSelect, disableActions }: CarouselCardProps) {
-  if (!dog) {
-    return <div className="hidden h-[420px] w-[260px] flex-shrink-0 lg:block" aria-hidden />;
-  }
-
-  const isCurrent = position === "current";
+}) {
+  const ageDisplay =
+    typeof dog.age === "number" ? `${dog.age} year${dog.age === 1 ? "" : "s"}` : String(dog.age);
+  const genderDisplay =
+    dog.gender === "male" ? "Male" : dog.gender === "female" ? "Female" : "Unknown";
 
   return (
     <div
-      className={`relative flex h-[420px] w-[260px] flex-shrink-0 flex-col overflow-hidden rounded-3xl bg-white shadow-xl transition-all duration-300 ease-out ${
-        isCurrent
-          ? "z-20 h-[470px] w-[320px] scale-100 opacity-100 blur-0"
-          : "pointer-events-none z-10 scale-90 opacity-50 blur-sm"
+      className={`relative mx-auto flex h-[470px] w-[320px] max-w-full flex-col overflow-hidden rounded-3xl bg-white shadow-xl transition-all duration-300 ease-out ${
+        isCurrent ? "opacity-100" : "opacity-90"
       }`}
     >
       <div className="relative h-1/2 w-full overflow-hidden bg-gray-100">
@@ -134,7 +149,7 @@ function CarouselCard({ dog, position, onSelect, disableActions }: CarouselCardP
         <div className="mb-3">
           <h3 className="text-2xl font-semibold text-gray-900">{dog.name}</h3>
           <p className="text-sm text-gray-600">
-            {dog.age} year{dog.age !== 1 ? "s" : ""} • {dog.gender === "male" ? "Male" : "Female"}
+            {ageDisplay} • {genderDisplay}
           </p>
         </div>
 
