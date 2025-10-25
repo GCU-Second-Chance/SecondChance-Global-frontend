@@ -47,6 +47,13 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const infoText = useMemo(() => (matchedDog ? buildShareText(matchedDog) : ""), [matchedDog]);
     const { cfg, bandStyle } = useMemo(() => getOverlayLayout({ width, height }), [width, height]);
+    const { overlayTextClass, overlayBgClass } = useMemo(() => {
+      const isLightFrame = frameId.toLowerCase().includes("white");
+      return {
+        overlayTextClass: isLightFrame ? "text-black" : "text-white",
+        overlayBgClass: isLightFrame ? "bg-white/70" : "bg-black/40",
+      };
+    }, [frameId]);
     useEffect(() => {
       let cancelled = false;
       async function gen() {
@@ -165,7 +172,9 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                 style={bandStyle}
               >
                 {matchedDog && (
-                  <div className="pointer-events-auto flex-1 overflow-hidden  p-1 text-white">
+                  <div
+                    className={`pointer-events-auto flex-1 overflow-hidden rounded ${overlayBgClass} p-1 md:p-2 ${overlayTextClass}`}
+                  >
                     <div className="whitespace-pre-line text-[9px] leading-tight md:text-xs">
                       {infoText}
                     </div>
