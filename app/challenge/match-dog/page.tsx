@@ -1,6 +1,7 @@
 /**
  * Dog Matching Page (Step 2)
- * Carousel view with batched dog loading
+ * Swipe through dogs in windows of 10.
+ * After 30 viewed (one batch), show Reload to fetch new set.
  */
 
 "use client";
@@ -12,7 +13,7 @@ import DogCarousel from "@/components/challenge/DogCarousel";
 import { useDogBatch } from "@/lib/react-query/hooks";
 import type { Dog } from "@/stores/types";
 import { logDogMatched } from "@/lib/analytics";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 function shuffleDogs(dogs: Dog[]): Dog[] {
   const copy = [...dogs];
@@ -28,9 +29,11 @@ function shuffleDogs(dogs: Dog[]): Dog[] {
 export default function MatchDogPage() {
   const router = useRouter();
   const { selectedFrame, matchDog, goToStep, nextStep } = useChallengeStore();
-  const [buffer, setBuffer] = useState<Dog[]>([]); // full batch (~30)
-  const [windowStart, setWindowStart] = useState(0); // 0,3,6...
-  const [activeIndex, setActiveIndex] = useState(1); // index within the 3-card window
+  const WINDOW_SIZE = 10;
+  const [buffer, setBuffer] = useState<Dog[]>([]); // current batch (~30)
+  const [windowStart, setWindowStart] = useState(0); // 0,10,20
+  const [activeIndex, setActiveIndex] = useState(0); // index within current window
+  const [exhausted, setExhausted] = useState(false); // reached end of 30
 
   const { data, isLoading, isFetching, isError, refetch } = useDogBatch();
 
@@ -41,88 +44,90 @@ export default function MatchDogPage() {
     }
   }, [selectedFrame, router]);
 
-  // Update local dog order whenever a new batch arrives
+  // 최초 로딩: 셔플 후 버퍼 채우고 포인터 초기화
   useEffect(() => {
-    if (data?.dogs?.length) {
+    if (data?.dogs?.length && buffer.length === 0) {
       const shuffled = shuffleDogs(data.dogs);
       setBuffer(shuffled);
       setWindowStart(0);
-      setActiveIndex(shuffled.length > 2 ? 1 : 0);
+      setActiveIndex(0);
+      setExhausted(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
-
-  const visible = useMemo(() => buffer.slice(windowStart, windowStart + 3), [buffer, windowStart]);
-  const currentDog = visible[activeIndex] ?? null;
+  const visible = useMemo(
+    () => buffer.slice(windowStart, windowStart + WINDOW_SIZE),
+    [buffer, windowStart, WINDOW_SIZE]
+  );
   const displayedCount = Math.min(windowStart + activeIndex + 1, buffer.length);
 
   const isInitialLoading = isLoading && buffer.length === 0;
   const isProcessingSelection = isFetching && buffer.length > 0;
-  const disableChoose = isInitialLoading; // don't block choose while fetching more in background
 
   const handleNext = async () => {
     if (visible.length === 0 || isProcessingSelection) return;
 
-    // Move within the 3-card window first
+    // move within current window of 10
     if (activeIndex < visible.length - 1) {
-      setActiveIndex((idx) => idx + 1);
+      setActiveIndex((i) => i + 1);
       return;
     }
 
-    // Advance to next window of 3, if available in buffer
-    if (windowStart + 3 < buffer.length) {
-      const nextStart = windowStart + 3;
+    // move to next window of 10 if exists within batch
+    if (windowStart + WINDOW_SIZE < buffer.length) {
+      const nextStart = windowStart + WINDOW_SIZE;
       setWindowStart(nextStart);
-      const nextLen = buffer.slice(nextStart, nextStart + 3).length;
-      setActiveIndex(nextLen > 2 ? 1 : 0);
+      const nextLen = buffer.slice(nextStart, nextStart + WINDOW_SIZE).length;
+      setActiveIndex(Math.min(0, nextLen - 1));
       return;
     }
 
-    // Exhausted the batch: refetch a fresh ~30 and reset
-    const res = await refetch();
-    const list = res.data?.dogs ?? [];
-    const shuffled = shuffleDogs(list);
-    setBuffer(shuffled);
-    setWindowStart(0);
-    setActiveIndex(shuffled.length > 2 ? 1 : 0);
+    // reached end of 30
+    setExhausted(true);
   };
 
   const handlePrevious = () => {
     if (visible.length === 0 || isProcessingSelection) return;
-
     if (activeIndex > 0) {
-      setActiveIndex((idx) => idx - 1);
+      setActiveIndex((i) => i - 1);
       return;
     }
-
-    if (windowStart - 3 >= 0) {
-      const prevStart = windowStart - 3;
+    if (windowStart - WINDOW_SIZE >= 0) {
+      const prevStart = windowStart - WINDOW_SIZE;
       setWindowStart(prevStart);
-      const prevLen = buffer.slice(prevStart, prevStart + 3).length;
-      // jump to end of previous window (middle if 3 exists, else clamp)
-      setActiveIndex(prevLen > 2 ? 2 : Math.max(0, prevLen - 1));
+      const prevLen = buffer.slice(prevStart, prevStart + WINDOW_SIZE).length;
+      setActiveIndex(Math.max(0, prevLen - 1));
     }
   };
 
-  const handleSelectDog = () => {
-    if (!currentDog) return;
+  const handleReload = async () => {
+    const res = await refetch();
+    const list = res.data?.dogs ?? [];
+    if (list.length) {
+      const shuffled = shuffleDogs(list);
+      setBuffer(shuffled);
+      setWindowStart(0);
+      setActiveIndex(0);
+      setExhausted(false);
+    }
+  };
 
+  const handleSelectDog = (dog: Dog) => {
+    const currentDog = dog ?? visible[activeIndex];
+    if (!currentDog) return;
     matchDog(currentDog);
     logDogMatched(currentDog.id, currentDog.name, "random");
-
     goToStep(2);
     nextStep();
     router.push("/challenge/upload-photos");
   };
 
   const subtitle = useMemo(() => {
-    if (isInitialLoading) {
-      return "Gathering the sweetest faces for you...";
-    }
-    if (currentDog) {
-      return `Swipe to meet ${currentDog.name} and their friends`;
-    }
+    if (isInitialLoading) return "Gathering the sweetest faces for you...";
+    if (exhausted) return "You’ve seen this set. Reload for more.";
+    if (visible.length > 0) return "Swipe to meet more friends";
     return "Unable to load new dogs right now. Please try again.";
-  }, [currentDog, isInitialLoading]);
+  }, [visible.length, isInitialLoading, exhausted]);
 
   if (!selectedFrame) {
     return null;
@@ -141,7 +146,7 @@ export default function MatchDogPage() {
         </div>
       </div>
 
-      {/* Carousel */}
+      {/* Carousel (10-window) */}
       <div className="mb-10">
         {isInitialLoading ? (
           <CarouselSkeleton />
@@ -152,20 +157,38 @@ export default function MatchDogPage() {
             <p>Please try again in a moment.</p>
           </div>
         ) : visible.length > 0 ? (
-          <DogCarousel
-            dogs={visible}
-            activeIndex={activeIndex}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            onSelect={handleSelectDog}
-            isProcessing={isProcessingSelection}
-            // disable only the choose action when initially loading
-            // (DogCarousel uses this to disable its main CTA)
-            disableChoose={disableChoose}
-          />
+          <div className="relative">
+            <DogCarousel
+              dogs={visible}
+              activeIndex={activeIndex}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              onSelect={handleSelectDog}
+              isProcessing={isProcessingSelection}
+              disableChoose={false}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (isProcessingSelection) return;
+                const nextStart = windowStart + WINDOW_SIZE;
+                if (nextStart < buffer.length) {
+                  setWindowStart(nextStart);
+                  setActiveIndex(0);
+                } else {
+                  void handleReload();
+                }
+              }}
+              className="absolute left-1/2 top-[-20px] z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition hover:bg-white"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {windowStart + WINDOW_SIZE < buffer.length ? "Rematch" : "Reload"}
+            </button>
+          </div>
         ) : (
           <CarouselSkeleton />
         )}
+        {/* Bottom reload is removed in favor of floating button */}
       </div>
 
       {/* Info Box */}
@@ -174,7 +197,7 @@ export default function MatchDogPage() {
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
-            <span>Swipe through the rescue spotlight to find the perfect companion.</span>
+            <span>Swipe through up to 10 at a time. After 30, reload for a new set.</span>
           </li>
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
@@ -182,10 +205,7 @@ export default function MatchDogPage() {
           </li>
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
-            <span>
-              Every share increases the chance that {currentDog?.name || "this pup"} finds a loving
-              home.
-            </span>
+            <span>Every share increases the chance they find a loving home.</span>
           </li>
         </ul>
       </div>

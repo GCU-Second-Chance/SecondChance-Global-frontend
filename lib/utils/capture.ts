@@ -69,6 +69,33 @@ export async function captureNodeToPng(
       logging: false,
       // 제외 요소 무시
       ignoreElements: buildIgnoreElements(excludeSelectors),
+      // Tailwind의 transform(var(--tw-...))이 html2canvas에서 누락되는 문제 보정
+      // 클론 DOM에 직접 transform을 주입해 좌우반전을 보장
+      onclone: (clonedDoc: Document, clonedNode: HTMLElement) => {
+        try {
+          // 좌우 반전 클래스가 적용된 모든 노드를 찾아 인라인 transform으로 강제
+          const mirrorCandidates = clonedNode.querySelectorAll(
+            '[class*="scale-x-[-1]"]'
+          );
+          mirrorCandidates.forEach((el) => {
+            const elem = el as HTMLElement;
+            // 인라인 transform이 Tailwind transform보다 우선 적용됨
+            elem.style.transform = "scaleX(-1)";
+            elem.style.transformOrigin = "center";
+          });
+
+          // 혹시 비표준 형태로 변수만 설정된 경우도 커버 (안전 차원)
+          const varScaleCandidates = clonedNode.querySelectorAll<HTMLElement>('[style*="--tw-scale-x:-1"], [style*="--tw-scale-x: -1"]');
+          varScaleCandidates.forEach((elem) => {
+            elem.style.transform = "scaleX(-1)";
+            elem.style.transformOrigin = "center";
+          });
+        } catch (e) {
+          // 주입 실패시에도 캡처는 계속 진행
+          // eslint-disable-next-line no-console
+          console.warn("[capture] onclone transform patch failed", e);
+        }
+      },
       // Let html2canvas use current window scroll by default
     });
 

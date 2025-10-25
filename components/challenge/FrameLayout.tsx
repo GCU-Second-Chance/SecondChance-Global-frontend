@@ -46,13 +46,22 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
 
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const infoText = useMemo(() => (matchedDog ? buildShareText(matchedDog) : ""), [matchedDog]);
-    const { cfg, bandStyle } = useMemo(() => getOverlayLayout({ width, height }), [width, height]);
-    const { overlayTextClass, overlayBgClass } = useMemo(() => {
+    const isNarrow = width <= 200;
+    const { cfg, bandStyle } = useMemo(
+      () => getOverlayLayout({ width, height }, { qrBoxRatio: isNarrow ? 0.5 : 0.6 }),
+      [width, height, isNarrow]
+    );
+    const qrStyle = useMemo(
+      () => ({ height: `${(isNarrow ? 0.5 : 0.6) * 100}%`, aspectRatio: "1 / 1" as const }),
+      [isNarrow]
+    );
+    const { textColor, bgColor } = useMemo(() => {
       const isLightFrame = frameId.toLowerCase().includes("white");
       return {
-        overlayTextClass: isLightFrame ? "text-black" : "text-white",
-        overlayBgClass: isLightFrame ? "bg-white/70" : "bg-black/40",
-      };
+        textColor: isLightFrame ? "#000" : "#fff",
+        // Use RGBA to avoid Tailwind's oklab/oklch color functions during capture
+        bgColor: isLightFrame ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.4)",
+      } as const;
     }, [frameId]);
     useEffect(() => {
       let cancelled = false;
@@ -173,16 +182,21 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
               >
                 {matchedDog && (
                   <div
-                    className={`pointer-events-auto flex-1 overflow-hidden rounded ${overlayBgClass} p-1 md:p-2 ${overlayTextClass}`}
+                    className="pointer-events-auto flex-1 overflow-hidden rounded p-1 md:p-2"
+                    style={{ backgroundColor: bgColor, color: textColor }}
                   >
-                    <div className="whitespace-pre-line text-[9px] leading-tight md:text-xs">
+                    <div className={`whitespace-pre-line ${isNarrow ? "text-[7px] md:text-[10px]" : "text-[9px] md:text-xs"} leading-tight`}>
                       {infoText}
                     </div>
                   </div>
                 )}
                 {qrDataUrl && (
-                  <div className="pointer-events-auto  absolute  right-[12.5px] bottom-[12.5px]   bg-white p-[1.5px]">
-                    <Image src={qrDataUrl} alt="QR" width={32} height={32} />
+                  <div
+                    className="pointer-events-auto rounded p-[1.5px]"
+                    style={{ ...qrStyle, backgroundColor: "#ffffff" }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={qrDataUrl} alt="QR" className="h-full w-full" />
                   </div>
                 )}
               </div>
