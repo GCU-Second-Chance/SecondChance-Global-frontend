@@ -4,6 +4,7 @@
  */
 
 "use client";
+export const dynamic = "force-dynamic";
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -35,8 +36,12 @@ export default function ChallengePage() {
         </h1>
 
         {/* Description */}
-        <p className="mb-8 text-base text-gray-600">
+        <p className="mb-4 text-base text-gray-600">
           Connecting loving homes with dogs in need worldwide.
+        </p>
+        <p className="mb-8 text-xs text-gray-500">
+          New: Try “Fortune of the day” on the final screen to add a short uplifting quote to your frame.
+          We don’t store your images — previews live only on your device and can be lost if you refresh.
         </p>
 
         {/* Start Button */}

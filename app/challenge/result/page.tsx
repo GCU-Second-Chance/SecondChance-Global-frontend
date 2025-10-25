@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { Download, Share2 } from "lucide-react";
 import { useChallengeStore } from "@/stores";
 import FrameLayoutResult from "@/components/challenge/FrameLayoutResult";
+import { buildShareTextBase } from "@/lib/utils/share";
 import { logResultDownloaded, logShareCompleted } from "@/lib/analytics";
 
 export default function ResultPage() {
@@ -18,6 +19,8 @@ export default function ResultPage() {
   const { selectedFrame, matchedDog, resultImageUrl, progress, photoSlots, goToStep, clearResult } =
     useChallengeStore();
   const [isSharing, setIsSharing] = useState(false);
+  const [fortune, setFortune] = useState<string | null>(null);
+  const [fortuneLeft, setFortuneLeft] = useState<number | null>(null);
   const dataUrlToFile = useCallback((dataUrl: string, filename: string) => {
     const [header, base64Data] = dataUrl.split(",");
     if (!header || !base64Data) {
@@ -63,6 +66,35 @@ export default function ResultPage() {
       router.push("/challenge/upload-photos");
     }
   }, [resultImageUrl, clearResult, goToStep, router]);
+
+  useEffect(() => {
+    // preload remaining fortune credits
+    (async () => {
+      try {
+        const res = await fetch("/api/fortune", { method: "GET", cache: "no-store" });
+        const j = await res.json();
+        if (typeof j.creditsLeft === "number") setFortuneLeft(j.creditsLeft);
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  async function handleFortune() {
+    try {
+      const res = await fetch("/api/fortune", { method: "POST" });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.message || `Fortune error (${res.status})`);
+      }
+      const j = (await res.json()) as { fortune: string; creditsLeft?: number };
+      setFortune(j.fortune);
+      if (typeof j.creditsLeft === "number") setFortuneLeft(j.creditsLeft);
+    } catch (e) {
+      console.error(e);
+      alert(e instanceof Error ? e.message : "Failed to get fortune");
+    }
+  }
 
   const filledPhotos = useMemo(
     () => photoSlots.filter((slot) => slot.imageUrl !== null),
@@ -197,6 +229,7 @@ Help this rescue dog find their second chance 💛
               slotPositions={selectedFrame.slotPositions}
               matchedDog={matchedDog}
               showOverlays
+              footerOverride={fortune ? `${buildShareTextBase(matchedDog)}\n${fortune}` : null}
             />
           </div>
         ) : (
@@ -217,6 +250,29 @@ Help this rescue dog find their second chance 💛
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
+          {/* Fortune of the day */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+            <p className="mb-2 text-sm font-medium text-gray-800">Fortune of the day</p>
+            <div className="mb-3 text-xs text-gray-500">{fortuneLeft !== null ? `Tries left: ${fortuneLeft}/3` : ``}</div>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={handleFortune}
+                disabled={fortuneLeft !== null && fortuneLeft <= 0}
+                className="rounded-full bg-gray-900 px-4 py-2 text-xs font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {fortune ? "Refresh Fortune" : "Insert Fortune"}
+              </button>
+              {fortune && (
+                <button
+                  onClick={() => setFortune(null)}
+                  className="rounded-full border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  Use Default
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Share Button (Primary) */}
           <button
             onClick={handleShare}

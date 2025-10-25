@@ -18,11 +18,21 @@ type FrameLayoutProps = {
   slotPositions: FrameSlotPosition[];
   matchedDog?: Dog | null;
   showOverlays?: boolean;
+  footerOverride?: string | null;
 };
 
 const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
   (
-    { photos, frameId, thumbnail, frameSize, slotPositions, matchedDog, showOverlays = true },
+    {
+      photos,
+      frameId,
+      thumbnail,
+      frameSize,
+      slotPositions,
+      matchedDog,
+      showOverlays = true,
+      footerOverride = null,
+    },
     ref
   ) => {
     const frameImageSrc = thumbnail;
@@ -31,6 +41,8 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
     const slotPositionMap = new Map(slotPositions.map((position) => [position.index, position]));
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const infoText = useMemo(() => (matchedDog ? buildShareText(matchedDog) : ""), [matchedDog]);
+    const displayText = useMemo(() => footerOverride ?? infoText, [footerOverride, infoText]);
+    const isFortune = !!footerOverride;
     const isNarrow = width <= 200;
     const { cfg, bandStyle } = useMemo(
       () => getOverlayLayout({ width, height }, { qrBoxRatio: isNarrow ? 0.5 : 0.6 }),
@@ -144,13 +156,15 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
               >
                 {matchedDog && (
                   <div
-                    className="pointer-events-auto flex-1 overflow-hidden rounded p-1"
-                    style={{ color: textColor }}
+                    className="pointer-events-auto flex-1 overflow-hidden rounded p-1 "
+                    style={{ color: textColor, backgroundColor: bgColor }}
                   >
                     <div
-                      className={`whitespace-pre-line ${isNarrow ? "text-[7px] " : "text-[9px] "} leading-tight`}
+                      className={`whitespace-pre-line break-words hyphens-auto ${
+                        isNarrow ? "text-[8px]" : "text-[10px] "
+                      } leading-snug tracking-tight ${isFortune ? "font-semibold" : ""}`}
                     >
-                      {infoText}
+                      {isFortune ? `🔮 ${displayText}` : displayText}
                     </div>
                   </div>
                 )}

@@ -77,8 +77,11 @@ export const useChallengeStore = create<ChallengeStore>()(
           return;
         }
 
+        const lastImage = Array.isArray(dog.images)
+          ? [...dog.images].filter(Boolean).at(-1) ?? null
+          : null;
         const updatedSlots = photoSlots.map((slot) =>
-          slot.index === dogSlotIndex ? { ...slot, imageUrl: dog.images[0] || null } : slot
+          slot.index === dogSlotIndex ? { ...slot, imageUrl: lastImage } : slot
         );
 
         set({

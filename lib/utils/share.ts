@@ -22,6 +22,28 @@ export function buildShareText(dog: Dog): string {
   return lines.join("\n");
 }
 
+// Base info only (no hashtags) — used when inserting Fortune-of-the-day
+export function buildShareTextBase(dog: Dog): string {
+  const name = dog.name || "this rescue";
+  const location = `${dog.location.city}, ${dog.location.country}`;
+  const shelterRaw = dog.shelter?.name?.trim();
+  const contactRaw = dog.shelter?.contact?.trim();
+
+  const lines: string[] = [];
+  lines.push(`🐾 ${name} find their second chance at a forever home!`);
+  lines.push(`📍 ${location}`);
+
+  if (shelterRaw && !/^unknown(?:\s+shelter)?$/i.test(shelterRaw)) {
+    lines.push(`🏠 ${shelterRaw}`);
+  }
+
+  if (contactRaw && !/^contact unavailable$/i.test(contactRaw)) {
+    lines.push(`☎️ ${contactRaw}`);
+  }
+
+  return lines.join("\n");
+}
+
 export function buildKoreanInfoPayload(dog: Dog): string {
   // Encode rich info as base64 JSON for the /share/info route
   const info = {

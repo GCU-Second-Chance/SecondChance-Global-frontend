@@ -25,6 +25,16 @@ export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardP
   const genderDisplay =
     dog.gender === "male" ? "Male" : dog.gender === "female" ? "Female" : "Unknown";
 
+  // choose last available image
+  const primaryImage = (() => {
+    const imgs = Array.isArray(dog.images) ? dog.images : [];
+    for (let i = imgs.length - 1; i >= 0; i -= 1) {
+      const src = imgs[i];
+      if (typeof src === "string" && src.trim().length > 0) return src;
+    }
+    return "/placeholder-dog.jpg";
+  })();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,7 +46,7 @@ export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardP
       {/* Dog Image */}
       <div className="relative h-80 w-full bg-gray-100">
         <Image
-          src={dog.images[0] || "/placeholder-dog.jpg"}
+          src={primaryImage}
           alt={dog.name}
           fill
           className="object-cover"

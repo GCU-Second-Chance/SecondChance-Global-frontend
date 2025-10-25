@@ -18,6 +18,7 @@ type FrameLayoutProps = {
   currentSlotIndex: number | null;
   onSlotClick: (index: number) => void;
   onRemove?: (index: number) => void;
+  onEnhance?: (index: number) => void;
   slotPositions: FrameSlotPosition[];
   matchedDog?: Dog | null;
   showOverlays?: boolean;
@@ -33,6 +34,7 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
       currentSlotIndex,
       onSlotClick,
       onRemove,
+      onEnhance,
       slotPositions,
       matchedDog,
       showOverlays = true,
@@ -143,6 +145,7 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                       {slot.index === currentSlotIndex ? "Selected Slot" : "Empty Slot"}
                     </div>
                   )}
+                  {/* Actions */}
                   {onRemove && slot.type === "user" && (
                     <button
                       id="remove"
@@ -155,6 +158,7 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                       Remove
                     </button>
                   )}
+                  {/** AI enhance button temporarily disabled **/}
                 </div>
               );
             })}

@@ -16,6 +16,7 @@ import { logPhotoUploaded } from "@/lib/analytics";
 import FrameLayout from "@/components/challenge/FrameLayout";
 import { captureNodeToPng } from "@/lib/utils/capture";
 import CameraCapture from "@/components/challenge/CameraCapture";
+import { useCallback } from "react";
 
 export default function UploadPhotosPage() {
   const router = useRouter();
@@ -33,6 +34,8 @@ export default function UploadPhotosPage() {
   const [currentSlotIndex, setCurrentSlotIndex] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiCreditsLeft, setAiCreditsLeft] = useState<number | null>(null);
   const [isGeneratingResult, setIsGeneratingResult] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -89,6 +92,20 @@ export default function UploadPhotosPage() {
     }
   }, [photoSlots, currentSlotIndex]);
 
+  // Fetch AI credits left (without consuming)
+  useEffect(() => {
+    async function fetchCredits() {
+      try {
+        const res = await fetch("/api/ai/transform", { method: "GET", cache: "no-store" });
+        const json = (await res.json()) as { creditsLeft?: number };
+        if (typeof json.creditsLeft === "number") setAiCreditsLeft(json.creditsLeft);
+      } catch {
+        // ignore
+      }
+    }
+    fetchCredits();
+  }, []);
+
   const handlePhotoUpload = async (file: File, uploadMethod: "camera" | "file") => {
     if (currentSlotIndex === null || !selectedFrame) return; // Ensure selectedFrame is available
 
@@ -128,6 +145,82 @@ export default function UploadPhotosPage() {
   const handleFileUpload = (file: File) => {
     handlePhotoUpload(file, "file");
   };
+
+  const enhanceSlot = useCallback(async (index: number) => {
+    const slot = photoSlots.find((s) => s.index === index);
+    if (!slot?.imageUrl) return;
+    setAiBusy(true);
+    setError("");
+    try {
+      let imagePayload = slot.imageUrl;
+      // If it's a blob: URL, convert to data URL on the client (server can't fetch blob:)
+      if (/^blob:/.test(imagePayload)) {
+        const res = await fetch(imagePayload);
+        const blob = await res.blob();
+        imagePayload = await new Promise<string>((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(String(fr.result));
+          fr.onerror = () => reject(new Error("Failed to read image"));
+          fr.readAsDataURL(blob);
+        });
+      } else if (!/^data:/.test(imagePayload)) {
+        const res = await fetch(imagePayload);
+        const blob = await res.blob();
+        imagePayload = await new Promise<string>((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(String(fr.result));
+          fr.onerror = () => reject(new Error("Failed to read image"));
+          fr.readAsDataURL(blob);
+        });
+      }
+
+      const res = await fetch("/api/ai/transform", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: imagePayload, mode: "enhance" }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        // 429 등 쿼터 초과 시 로컬 간단 보정으로 폴백
+        if (res.status === 429 || String(j?.message || "").toLowerCase().includes("quota")) {
+          // local lightweight enhancement via canvas filters
+          try {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = imagePayload;
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+            });
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) throw new Error("Canvas unsupported");
+            // Subtle improvements
+            // contrast(1.06) saturate(1.05) brightness(1.03)
+            (ctx as any).filter = "contrast(1.06) saturate(1.05) brightness(1.03)";
+            ctx.drawImage(img, 0, 0);
+            const fallbackDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+            setPhotoSlot(index, fallbackDataUrl);
+            setError("Free AI quota exceeded; applied a local quick enhancement.");
+            return;
+          } catch (fe) {
+            throw new Error(j?.message || `AI quota exceeded`);
+          }
+        }
+        throw new Error(j?.message || `AI request failed (${res.status})`);
+      }
+      const out = (await res.json()) as { image: string; creditsLeft?: number };
+      setPhotoSlot(index, out.image);
+      if (typeof out.creditsLeft === "number") setAiCreditsLeft(out.creditsLeft);
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : "AI transform failed");
+    } finally {
+      setAiBusy(false);
+    }
+  }, [photoSlots, setPhotoSlot]);
 
   const handleCameraCapture = (file: File) => {
     handlePhotoUpload(file, "camera");
@@ -230,6 +323,11 @@ export default function UploadPhotosPage() {
           currentSlotIndex={currentSlotIndex}
           onSlotClick={handleSlotClick}
           onRemove={handleRemovePhoto}
+          onEnhance={(idx) => {
+            if (aiCreditsLeft !== null && aiCreditsLeft <= 0) return;
+            if (aiBusy) return;
+            void enhanceSlot(idx);
+          }}
           matchedDog={matchedDog}
           showOverlays
         />
@@ -243,9 +341,14 @@ export default function UploadPhotosPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <p className="text-center text-lg font-medium text-gray-700">
-            Add photo for slot {currentSlotIndex + 1}
-          </p>
+          {false && (
+            <p className="text-center text-lg font-medium text-gray-700">
+              Add photo for slot {(currentSlotIndex ?? 0) + 1}
+            </p>
+          )}
+          {false && aiCreditsLeft !== null && (
+            <p className="text-center text-xs text-gray-500">AI {aiCreditsLeft}/2 today</p>
+          )}
 
           {/* Camera Button */}
           <button
@@ -264,6 +367,8 @@ export default function UploadPhotosPage() {
             disabled={isProcessing}
             frameId={selectedFrame.id}
           />
+
+          {/* AI 버튼은 슬롯 카드 좌측 상단에 배치됨(여기선 제거) */}
         </motion.div>
       )}
 

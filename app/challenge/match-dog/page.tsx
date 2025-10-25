@@ -134,7 +134,7 @@ export default function MatchDogPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
+    <div className="container justify-center items-center flex flex-col mx-auto max-w-5xl px-4 py-8">
       {/* Header */}
       <div className="mb-10 text-center">
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Meet Your Match</h1>
@@ -145,6 +145,25 @@ export default function MatchDogPage() {
           <span>dogs discovered</span>
         </div>
       </div>
+
+      {/* Reload Button */}
+      <button
+        type="button"
+        onClick={() => {
+          if (isProcessingSelection) return;
+          const nextStart = windowStart + WINDOW_SIZE;
+          if (nextStart < buffer.length) {
+            setWindowStart(nextStart);
+            setActiveIndex(0);
+          } else {
+            void handleReload();
+          }
+        }}
+        className=" z-10 inline-flex  items-center  justify-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition hover:bg-white w-fit"
+      >
+        <RefreshCw className="h-4 w-4" />
+        {windowStart + WINDOW_SIZE < buffer.length ? "Rematch" : "Reload"}
+      </button>
 
       {/* Carousel (10-window) */}
       <div className="mb-10">
@@ -168,23 +187,6 @@ export default function MatchDogPage() {
               isProcessing={isProcessingSelection}
               disableChoose={false}
             />
-            <button
-              type="button"
-              onClick={() => {
-                if (isProcessingSelection) return;
-                const nextStart = windowStart + WINDOW_SIZE;
-                if (nextStart < buffer.length) {
-                  setWindowStart(nextStart);
-                  setActiveIndex(0);
-                } else {
-                  void handleReload();
-                }
-              }}
-              className="absolute left-1/2 top-[-20px] z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition hover:bg-white"
-            >
-              <RefreshCw className="h-4 w-4" />
-              {windowStart + WINDOW_SIZE < buffer.length ? "Rematch" : "Reload"}
-            </button>
           </div>
         ) : (
           <CarouselSkeleton />
@@ -216,7 +218,7 @@ export default function MatchDogPage() {
 
 function CarouselSkeleton() {
   return (
-    <div className="flex w-full items-center justify-center gap-5 px-4">
+    <div className="flex w-full items-center justify-center gap-5 px-4 mt-8">
       {[0, 1, 2].map((index) => (
         <div
           key={index}

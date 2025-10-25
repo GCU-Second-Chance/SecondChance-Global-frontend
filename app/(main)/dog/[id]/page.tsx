@@ -162,7 +162,11 @@ Help ${dog.name} find their forever home! #SecondChanceGlobal #AdoptDontShop`;
         >
           <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl bg-gray-100 md:aspect-video">
             <Image
-              src={dog.images[currentImageIndex] || dog.images[0] || ""}
+              src={
+                dog.images[currentImageIndex] ||
+                (Array.isArray(dog.images) ? [...dog.images].filter(Boolean).at(-1) : "") ||
+                ""
+              }
               alt={dog.name}
               fill
               className="object-cover"

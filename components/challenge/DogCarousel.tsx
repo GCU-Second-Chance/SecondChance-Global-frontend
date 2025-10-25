@@ -52,6 +52,13 @@ export default function DogCarousel({
 
   return (
     <div className="relative mx-auto w-full max-w-5xl">
+      {/* Loading overlay when processing (rematch/fetch) */}
+      {isProcessing && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/60 backdrop-blur-sm">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-[#ff6b5a]" />
+          <span className="text-xs font-medium text-gray-700">Refreshing suggestions…</span>
+        </div>
+      )}
       <Swiper
         ref={swiperRef}
         effect="cards"
