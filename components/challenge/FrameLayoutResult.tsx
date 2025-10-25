@@ -1,6 +1,10 @@
-import React, { forwardRef } from "react";
+"use client";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import type { FrameSlotPosition, PhotoSlot } from "@/stores/types";
+import type { Dog, FrameSlotPosition, PhotoSlot } from "@/stores/types";
+import { buildShareText, buildShareUrl } from "@/lib/utils/share";
+import { toQrDataUrl } from "@/lib/utils/qr";
+import { getOverlayLayout } from "@/lib/utils/frame-overlay";
 
 type FrameLayoutProps = {
   photos: PhotoSlot[];
@@ -12,14 +16,43 @@ type FrameLayoutProps = {
     height: number;
   };
   slotPositions: FrameSlotPosition[];
+  matchedDog?: Dog | null;
+  showOverlays?: boolean;
 };
 
 const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
-  ({ photos, frameId, thumbnail, frameSize, slotPositions }, ref) => {
+  ({ photos, frameId, thumbnail, frameSize, slotPositions, matchedDog, showOverlays = true }, ref) => {
     const frameImageSrc = thumbnail;
     const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
     const { width, height } = frameSize;
     const slotPositionMap = new Map(slotPositions.map((position) => [position.index, position]));
+    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+    const infoText = useMemo(() => (matchedDog ? buildShareText(matchedDog) : ""), [matchedDog]);
+    const { cfg, bandStyle, qrContainerStyle } = useMemo(
+      () => getOverlayLayout({ width, height }),
+      [width, height]
+    );
+
+    useEffect(() => {
+      let cancelled = false;
+      async function gen() {
+        if (!matchedDog) {
+          setQrDataUrl(null);
+          return;
+        }
+        try {
+          const url = buildShareUrl(matchedDog);
+          const dataUrl = await toQrDataUrl(url, cfg.qrGeneratePx);
+          if (!cancelled) setQrDataUrl(dataUrl);
+        } catch {
+          if (!cancelled) setQrDataUrl(null);
+        }
+      }
+      gen();
+      return () => {
+        cancelled = true;
+      };
+    }, [matchedDog, cfg.qrGeneratePx]);
 
     return (
       <div id="frame" className="flex w-full items-center justify-center bg-gray-100 py-4">
@@ -85,6 +118,33 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
               priority
             />
           </div>
+
+          {/* Info + QR overlays (above frame) */}
+          {showOverlays && (
+            <div className="absolute inset-0 z-30 pointer-events-none select-none">
+              <div
+                className="absolute left-0 right-0 bottom-0 flex items-end gap-2 px-2 pb-2 md:px-3 md:pb-3"
+                style={bandStyle}
+              >
+                {matchedDog && (
+                  <div className="pointer-events-auto flex-1 overflow-hidden rounded bg-black/40 p-1 text-white md:p-2">
+                    <div className="whitespace-pre-line text-[9px] leading-tight md:text-xs">
+                      {infoText}
+                    </div>
+                  </div>
+                )}
+                {qrDataUrl && (
+                  <div
+                    className="pointer-events-auto rounded bg-white/90 p-1"
+                    style={qrContainerStyle}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={qrDataUrl} alt="QR" className="h-full w-full" />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

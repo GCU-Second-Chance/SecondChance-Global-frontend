@@ -143,6 +143,17 @@ export const useChallengeStore = create<ChallengeStore>()(
         });
       },
 
+      // Clear result data (when preview/capture missing or invalid)
+      clearResult: () => {
+        set({
+          resultImageUrl: null,
+          progress: {
+            ...get().progress,
+            resultGenerated: false,
+          },
+        });
+      },
+
       // Reset entire flow
       reset: () => {
         set(initialState);

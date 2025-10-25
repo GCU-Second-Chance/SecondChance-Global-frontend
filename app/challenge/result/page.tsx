@@ -15,7 +15,8 @@ import { logResultDownloaded, logShareCompleted } from "@/lib/analytics";
 
 export default function ResultPage() {
   const router = useRouter();
-  const { selectedFrame, matchedDog, resultImageUrl, progress, photoSlots } = useChallengeStore();
+  const { selectedFrame, matchedDog, resultImageUrl, progress, photoSlots, goToStep, clearResult } =
+    useChallengeStore();
   const [isSharing, setIsSharing] = useState(false);
   const dataUrlToFile = useCallback((dataUrl: string, filename: string) => {
     const [header, base64Data] = dataUrl.split(",");
@@ -56,9 +57,12 @@ export default function ResultPage() {
   // Remove unnecessary image generation logic
   useEffect(() => {
     if (!resultImageUrl) {
+      // If we landed on result without a captured image, reset result state and step back to photo upload
+      clearResult();
+      goToStep(3);
       router.push("/challenge/upload-photos");
     }
-  }, [resultImageUrl, router]);
+  }, [resultImageUrl, clearResult, goToStep, router]);
 
   const filledPhotos = useMemo(
     () => photoSlots.filter((slot) => slot.imageUrl !== null),
@@ -191,6 +195,8 @@ Help this rescue dog find their second chance 💛
               thumbnail={selectedFrame.thumbnail}
               frameSize={selectedFrame.frameSize}
               slotPositions={selectedFrame.slotPositions}
+              matchedDog={matchedDog}
+              showOverlays
             />
           </div>
         ) : (

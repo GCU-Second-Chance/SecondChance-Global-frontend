@@ -110,6 +110,9 @@ export interface ChallengeActions {
   // Result generation
   setResultImage: (imageUrl: string) => void;
 
+  // Clear result
+  clearResult: () => void;
+
   // Reset entire flow
   reset: () => void;
 }

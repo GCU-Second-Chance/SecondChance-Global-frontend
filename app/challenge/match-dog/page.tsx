@@ -57,6 +57,7 @@ export default function MatchDogPage() {
 
   const isInitialLoading = isLoading && buffer.length === 0;
   const isProcessingSelection = isFetching && buffer.length > 0;
+  const disableChoose = isInitialLoading; // don't block choose while fetching more in background
 
   const handleNext = async () => {
     if (visible.length === 0 || isProcessingSelection) return;
@@ -158,6 +159,9 @@ export default function MatchDogPage() {
             onPrevious={handlePrevious}
             onSelect={handleSelectDog}
             isProcessing={isProcessingSelection}
+            // disable only the choose action when initially loading
+            // (DogCarousel uses this to disable its main CTA)
+            disableChoose={disableChoose}
           />
         ) : (
           <CarouselSkeleton />

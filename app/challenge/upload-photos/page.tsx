@@ -58,6 +58,27 @@ export default function UploadPhotosPage() {
     }
   }, [selectedFrame, matchedDog, router]);
 
+  // Validate persisted photo URLs on mount; clear any invalid blob: URLs (object URLs don't survive reload)
+  useEffect(() => {
+    let cleared = false;
+    photoSlots.forEach((slot) => {
+      if (slot.type === "user" && slot.imageUrl && slot.imageUrl.startsWith("blob:")) {
+        clearPhotoSlot(slot.index);
+        cleared = true;
+      }
+    });
+    if (cleared) {
+      // Ensure we reselect the first empty user slot after clearing
+      const firstEmptyUserSlot = photoSlots.find((slot) => slot.type === "user" && !slot.imageUrl);
+      if (firstEmptyUserSlot) {
+        setCurrentSlotIndex(firstEmptyUserSlot.index);
+      } else {
+        setCurrentSlotIndex(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Auto-select first empty user slot
   useEffect(() => {
     if (photoSlots.length > 0 && currentSlotIndex === null) {
@@ -209,6 +230,8 @@ export default function UploadPhotosPage() {
           currentSlotIndex={currentSlotIndex}
           onSlotClick={handleSlotClick}
           onRemove={handleRemovePhoto}
+          matchedDog={matchedDog}
+          showOverlays
         />
       </div>
 

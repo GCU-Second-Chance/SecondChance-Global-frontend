@@ -17,6 +17,7 @@ interface DogCarouselProps {
   onPrevious: () => void;
   onSelect: (dog: Dog) => void;
   isProcessing?: boolean;
+  disableChoose?: boolean;
 }
 
 export default function DogCarousel({
@@ -26,6 +27,7 @@ export default function DogCarousel({
   onPrevious,
   onSelect,
   isProcessing = false,
+  disableChoose = false,
 }: DogCarouselProps) {
   const swiperRef = useRef<any>(null);
   const syncingRef = useRef(false);
@@ -70,7 +72,7 @@ export default function DogCarousel({
               dog={dog}
               isCurrent={index === activeIndex}
               onSelect={() => onSelect(dog)}
-              disableActions={isProcessing}
+              disableActions={isProcessing || disableChoose}
             />
           </SwiperSlide>
         ))}
