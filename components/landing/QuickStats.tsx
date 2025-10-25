@@ -19,10 +19,12 @@ function CountUpAnimation({
   end,
   suffix,
   duration = 2,
+  className,
 }: {
   end: number;
   suffix: string;
   duration?: number;
+  className?: string;
 }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ function CountUpAnimation({
   }, [end, duration, isInView]);
 
   return (
-    <div ref={ref} className="text-4xl font-bold text-gray-900 md:text-5xl">
+    <div ref={ref} className={className ?? "text-4xl font-bold text-gray-900 md:text-5xl"}>
       {count.toLocaleString()}
       {suffix}
     </div>
@@ -89,22 +91,34 @@ export default function QuickStats() {
 
         {/* Featured Stat Card */}
         <motion.div
-          className="mb-4 flex items-center gap-3 rounded-2xl bg-gray-50 p-4 shadow-sm md:mb-6 md:gap-4 md:p-6"
+          className="relative mb-4 flex items-center gap-3 overflow-hidden rounded-3xl bg-gray-50 p-5 shadow md:mb-6 md:gap-5 md:p-7"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
+          {/* Light sweep animation */}
+          <motion.div
+            className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 bg-gradient-to-r from-white/0 via-white/40 to-white/0"
+            initial={{ x: "-120%" }}
+            whileInView={{ x: "160%" }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
+          />
           <div className="flex-shrink-0">
-            <div className="h-12 w-12 overflow-hidden rounded-xl bg-gray-200 md:h-16 md:w-16">
+            <div className="h-12 w-12 overflow-hidden rounded-2xl bg-gray-200 md:h-16 md:w-16">
               <div className="flex h-full items-center justify-center text-2xl md:text-3xl">📊</div>
             </div>
           </div>
           <div className="flex-1">
             <div className="mb-0.5 text-xl font-bold text-gray-900 md:mb-1 md:text-2xl">
-              <div className="flex items-baseline gap-2">
-                <CountUpAnimation end={STRAY_DOGS_WORLDWIDE} suffix="+" />
-                <span className="text-sm font-semibold text-gray-700 md:text-base">
+              <div className="flex flex-col gap-1 md:flex-row md:items-baseline md:gap-3">
+                <CountUpAnimation
+                  end={STRAY_DOGS_WORLDWIDE}
+                  suffix="+"
+                  className="leading-none text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl lg:text-7xl"
+                />
+                <span className="text-sm font-semibold text-gray-700 md:text-base lg:text-lg">
                   Estimated stray dogs worldwide (2025)
                 </span>
               </div>
@@ -118,14 +132,18 @@ export default function QuickStats() {
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              className="rounded-2xl bg-gray-50 p-4 text-center shadow-sm transition-all hover:shadow-md md:p-6"
+              className="rounded-3xl bg-gray-50 p-5 text-center shadow transition-all hover:shadow-md md:p-7"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
             >
               {stat.icon && <div className="mb-2 text-3xl md:mb-3 md:text-4xl">{stat.icon}</div>}
-              <CountUpAnimation end={stat.value} suffix={stat.suffix || ""} />
+              <CountUpAnimation
+                end={stat.value}
+                suffix={stat.suffix || ""}
+                className="text-4xl font-extrabold text-gray-900 md:text-5xl"
+              />
               <div className="mt-1 text-xs text-gray-600 md:mt-2 md:text-sm">{stat.label}</div>
             </motion.div>
           ))}
