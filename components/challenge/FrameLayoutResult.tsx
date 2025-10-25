@@ -15,23 +15,21 @@ type FrameLayoutProps = {
 };
 
 const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
-  ({ photos, frameLayout, frameId, thumbnail, frameSize, slotPositions }, ref) => {
+  ({ photos, frameId, thumbnail, frameSize, slotPositions }, ref) => {
     const frameImageSrc = thumbnail;
     const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
     const { width, height } = frameSize;
     const slotPositionMap = new Map(slotPositions.map((position) => [position.index, position]));
 
-    const responsiveScaleClass =
-      frameLayout === 1 ? "scale-[0.85] origin-top sm:scale-100" : "scale-100";
-
     return (
-      <div
-        className={`flex bg-gray-100 items-center justify-center w-full py-4 ${responsiveScaleClass}`}
-      >
+      <div id="frame" className="flex w-full items-center justify-center bg-gray-100 py-4">
         <div
           ref={ref}
-          className="relative flex items-center justify-center"
-          style={{ width, height }}
+          className="relative w-full"
+          style={{
+            aspectRatio: `${width} / ${height}`,
+            maxWidth: `${width}px`,
+          }}
         >
           {/* Photo Slots */}
           <div className="absolute inset-0 z-10">
@@ -57,7 +55,7 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
               return (
                 <div
                   key={slot.index}
-                  className="absolute overflow-hidden bg-white"
+                  className="absolute overflow-hidden bg-white shadow-sm transition-shadow"
                   style={computedStyle}
                 >
                   {slot.imageUrl && (
@@ -78,8 +76,8 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
             <Image
               src={frameImageSrc}
               alt={`Frame layout for ${frameId}`}
-              width={width}
-              height={height}
+              fill
+              sizes={`(max-width: ${width}px) 100vw, ${width}px`}
               style={{ objectFit: "contain" }}
               className="pointer-events-none"
               priority

@@ -15,9 +15,9 @@ export const dogKeys = {
   all: ["dogs"] as const,
   list: (limit: number, offset: number) => [...dogKeys.all, "list", limit, offset] as const,
   detail: (id: string, country?: string) =>
-    (country
-      ? [...dogKeys.all, "detail", id, country]
-      : [...dogKeys.all, "detail", id]) as const,
+    country
+      ? ([...dogKeys.all, "detail", id, country] as const)
+      : ([...dogKeys.all, "detail", id] as const),
   random: () => [...dogKeys.all, "random"] as const,
 };
 

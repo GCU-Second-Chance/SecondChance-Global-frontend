@@ -159,17 +159,14 @@ function normalizeDogPayload(payload: unknown): Dog[] {
 
   if (typeof payload === "object") {
     if ("data" in payload) {
-      // @ts-expect-error - runtime guard handles the shape
       return normalizeDogPayload((payload as { data: unknown }).data);
     }
 
     if ("dogs" in payload) {
-      // @ts-expect-error - runtime guard handles the shape
       return normalizeDogPayload((payload as { dogs: unknown }).dogs);
     }
 
     if ("items" in payload) {
-      // @ts-expect-error - runtime guard handles the shape
       return normalizeDogPayload((payload as { items: unknown }).items);
     }
 
@@ -268,9 +265,7 @@ export async function fetchDogs(options: FetchDogsOptions = {}): Promise<DogList
 export async function fetchDogById(id: string, country?: string): Promise<Dog> {
   const baseUrl = getApiBaseUrl();
   const endpoint = `${baseUrl}/api/v1/dogs/`;
-  const candidateCountries = country
-    ? [country]
-    : [...DEFAULT_COUNTRY_CANDIDATES];
+  const candidateCountries = country ? [country] : [...DEFAULT_COUNTRY_CANDIDATES];
   const numericId = Number(id);
   const idPayload = Number.isNaN(numericId) ? id : numericId;
 
