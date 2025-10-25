@@ -139,16 +139,16 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
           {showOverlays && (
             <div className="absolute inset-0 z-30 pointer-events-none select-none">
               <div
-                className="absolute left-0 right-0 bottom-0 flex items-end gap-2 px-2 pb-2 md:px-3 md:pb-3"
+                className="absolute left-0 right-0 bottom-0 flex items-end gap-2 px-2 pb-2"
                 style={bandStyle}
               >
                 {matchedDog && (
                   <div
-                    className="pointer-events-auto flex-1 overflow-hidden rounded p-1 md:p-2"
-                    style={{ backgroundColor: bgColor, color: textColor }}
+                    className="pointer-events-auto flex-1 overflow-hidden rounded p-1"
+                    style={{ color: textColor }}
                   >
                     <div
-                      className={`whitespace-pre-line ${isNarrow ? "text-[7px] md:text-[10px]" : "text-[9px] md:text-xs"} leading-tight`}
+                      className={`whitespace-pre-line ${isNarrow ? "text-[7px] " : "text-[9px] "} leading-tight`}
                     >
                       {infoText}
                     </div>
