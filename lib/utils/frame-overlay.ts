@@ -24,10 +24,5 @@ export function getOverlayLayout(
     height: `${bandHeightPercent}%`,
   };
 
-  const qrContainerStyle: React.CSSProperties = {
-    height: cfg.qrBoxRatio >= 1 ? "100%" : `${cfg.qrBoxRatio * 100}%`,
-    aspectRatio: "1 / 1",
-  };
-
-  return { cfg, bandStyle, qrContainerStyle };
+  return { cfg, bandStyle };
 }

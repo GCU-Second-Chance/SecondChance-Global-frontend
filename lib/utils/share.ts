@@ -7,10 +7,7 @@ export function buildShareText(dog: Dog): string {
   const contactRaw = dog.shelter?.contact?.trim();
 
   const lines: string[] = [];
-  lines.push(`🐾 ${name} is looking for a forever home!`);
-  lines.push("");
-  lines.push("Help this rescue dog find their second chance 💛");
-  lines.push("");
+  lines.push(`🐾 ${name} find their second chance at a forever home!`);
   lines.push(`📍 ${location}`);
 
   if (shelterRaw && !/^unknown(?:\s+shelter)?$/i.test(shelterRaw)) {
@@ -21,7 +18,7 @@ export function buildShareText(dog: Dog): string {
     lines.push(`☎️ ${contactRaw}`);
   }
 
-  lines.push("", "#SecondChanceGlobal #AdoptDontShop");
+  lines.push("#SecondChanceGlobal #AdoptDontShop");
   return lines.join("\n");
 }
 
@@ -38,9 +35,10 @@ export function buildKoreanInfoPayload(dog: Dog): string {
   };
   const json = JSON.stringify(info);
   // base64url encode to be URL path safe
-  const b64 = typeof window === "undefined"
-    ? Buffer.from(json).toString("base64url")
-    : btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  const b64 =
+    typeof window === "undefined"
+      ? Buffer.from(json).toString("base64url")
+      : btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   return b64;
 }
 
@@ -48,8 +46,10 @@ export function buildShareUrl(dog: Dog, originBase?: string): string {
   const base = originBase || (typeof window !== "undefined" ? window.location.origin : "");
 
   // American (id only), Korean (rich info), default to id if unknown
-  const isAmerican = dog.origin === "American" || /united states|usa|america/i.test(dog.location.country);
-  const isKorean = dog.origin === "Korean" || /korea|korean|대한민국|한국/i.test(dog.location.country);
+  const isAmerican =
+    dog.origin === "American" || /united states|usa|america/i.test(dog.location.country);
+  const isKorean =
+    dog.origin === "Korean" || /korea|korean|대한민국|한국/i.test(dog.location.country);
 
   if (isKorean) {
     const payload = buildKoreanInfoPayload(dog);

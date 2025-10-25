@@ -21,17 +21,17 @@ type FrameLayoutProps = {
 };
 
 const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
-  ({ photos, frameId, thumbnail, frameSize, slotPositions, matchedDog, showOverlays = true }, ref) => {
+  (
+    { photos, frameId, thumbnail, frameSize, slotPositions, matchedDog, showOverlays = true },
+    ref
+  ) => {
     const frameImageSrc = thumbnail;
     const sortedPhotos = [...photos].sort((a, b) => a.index - b.index);
     const { width, height } = frameSize;
     const slotPositionMap = new Map(slotPositions.map((position) => [position.index, position]));
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const infoText = useMemo(() => (matchedDog ? buildShareText(matchedDog) : ""), [matchedDog]);
-    const { cfg, bandStyle, qrContainerStyle } = useMemo(
-      () => getOverlayLayout({ width, height }),
-      [width, height]
-    );
+    const { cfg, bandStyle } = useMemo(() => getOverlayLayout({ width, height }), [width, height]);
 
     useEffect(() => {
       let cancelled = false;
@@ -134,12 +134,8 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
                   </div>
                 )}
                 {qrDataUrl && (
-                  <div
-                    className="pointer-events-auto rounded bg-white/90 p-1"
-                    style={qrContainerStyle}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={qrDataUrl} alt="QR" className="h-full w-full" />
+                  <div className="pointer-events-auto  absolute  right-[12.5px] bottom-[12.5px]   bg-white p-[1.5px]">
+                    <Image src={qrDataUrl} alt="QR" width={32} height={32} />
                   </div>
                 )}
               </div>

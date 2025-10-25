@@ -46,10 +46,7 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
 
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const infoText = useMemo(() => (matchedDog ? buildShareText(matchedDog) : ""), [matchedDog]);
-    const { cfg, bandStyle, qrContainerStyle } = useMemo(
-      () => getOverlayLayout({ width, height }),
-      [width, height]
-    );
+    const { cfg, bandStyle } = useMemo(() => getOverlayLayout({ width, height }), [width, height]);
     useEffect(() => {
       let cancelled = false;
       async function gen() {
@@ -168,19 +165,15 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                 style={bandStyle}
               >
                 {matchedDog && (
-                  <div className="pointer-events-auto flex-1 overflow-hidden rounded bg-black/40 p-1 text-white md:p-2">
+                  <div className="pointer-events-auto flex-1 overflow-hidden  p-1 text-white">
                     <div className="whitespace-pre-line text-[9px] leading-tight md:text-xs">
                       {infoText}
                     </div>
                   </div>
                 )}
                 {qrDataUrl && (
-                  <div
-                    className="pointer-events-auto rounded bg-white/90 p-1"
-                    style={qrContainerStyle}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={qrDataUrl} alt="QR" className="h-full w-full" />
+                  <div className="pointer-events-auto  absolute  right-[12.5px] bottom-[12.5px]   bg-white p-[1.5px]">
+                    <Image src={qrDataUrl} alt="QR" width={32} height={32} />
                   </div>
                 )}
               </div>
