@@ -42,7 +42,7 @@ export default function Vision() {
           {items.map((item, idx) => (
             <motion.div
               key={item.title}
-              className="flex items-start gap-3 rounded-2xl bg-gray-50 p-4 shadow-sm md:gap-4 md:p-5"
+              className="flex items-start gap-3 rounded-3xl bg-gray-50 p-5 shadow md:gap-4 md:p-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -59,4 +59,3 @@ export default function Vision() {
     </section>
   );
 }
-

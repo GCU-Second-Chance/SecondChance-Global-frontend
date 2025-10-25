@@ -20,11 +20,13 @@ function CountUpAnimation({
   suffix,
   duration = 2,
   className,
+  onProgress,
 }: {
   end: number;
   suffix: string;
   duration?: number;
   className?: string;
+  onProgress?: (progress01: number) => void;
 }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -45,6 +47,7 @@ function CountUpAnimation({
       const currentCount = Math.floor(end * easeOutCubic(progress));
 
       setCount(currentCount);
+      if (typeof onProgress === "function") onProgress(progress);
 
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
@@ -74,6 +77,7 @@ export default function QuickStats() {
     { label: "Waiting in shelters (est.)", value: SHELTER_WAITING, suffix: "+", icon: "🏠" },
     { label: "Countries Participating", value: COUNTRIES_PARTICIPATING, icon: "🌍" },
   ];
+  const [featuredProgress, setFeaturedProgress] = useState(0);
 
   return (
     <section className="bg-white px-4 py-8 md:py-12">
@@ -92,6 +96,7 @@ export default function QuickStats() {
         {/* Featured Stat Card */}
         <motion.div
           className="relative mb-4 flex items-center gap-3 overflow-hidden rounded-3xl bg-gray-50 p-5 shadow md:mb-6 md:gap-5 md:p-7"
+          style={{ filter: `brightness(${(0.95 + featuredProgress * 0.12).toFixed(3)})` }}
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -106,9 +111,14 @@ export default function QuickStats() {
             transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
           />
           <div className="flex-shrink-0">
-            <div className="h-12 w-12 overflow-hidden rounded-2xl bg-gray-200 md:h-16 md:w-16">
+            <motion.div
+              className="h-12 w-12 overflow-hidden rounded-2xl md:h-16 md:w-16"
+              initial={{ backgroundColor: '#e5e7eb' }}
+              animate={{ backgroundColor: featuredProgress > 0 ? '#ffe1da' : '#e5e7eb' }}
+              transition={{ duration: 1.0, ease: 'easeOut' }}
+            >
               <div className="flex h-full items-center justify-center text-2xl md:text-3xl">📊</div>
-            </div>
+            </motion.div>
           </div>
           <div className="flex-1">
             <div className="mb-0.5 text-xl font-bold text-gray-900 md:mb-1 md:text-2xl">
@@ -117,6 +127,7 @@ export default function QuickStats() {
                   end={STRAY_DOGS_WORLDWIDE}
                   suffix="+"
                   className="leading-none text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl lg:text-7xl"
+                  onProgress={setFeaturedProgress}
                 />
                 <span className="text-sm font-semibold text-gray-700 md:text-base lg:text-lg">
                   Estimated stray dogs worldwide (2025)
@@ -125,6 +136,20 @@ export default function QuickStats() {
             </div>
             <div className="text-xs text-gray-600 md:text-sm">Approximate global estimate</div>
           </div>
+
+          {/* Sparkles for hopeful tone */}
+          {Array.from({ length: 3 }).map((_, i) => (
+            <motion.div
+              // eslint-disable-next-line react/no-array-index-key
+              key={i}
+              className="pointer-events-none absolute h-2 w-2 rounded-full bg-white/70"
+              style={{ top: `${20 + i * 18}%`, left: `${58 + i * 10}%` }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              whileInView={{ opacity: [0, 1, 0], scale: [0.6, 1.2, 1] }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.4, delay: 0.25 + i * 0.15 }}
+            />
+          ))}
         </motion.div>
 
         {/* Grid Stats */}

@@ -23,7 +23,7 @@ function DogCard({ dog }: { dog: Dog }) {
   const href = useMemo(() => buildShareUrl(dog, ""), [dog]);
 
   return (
-    <Link href={href} className="group block overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-md">
+    <Link href={href} className="group block overflow-hidden rounded-3xl bg-white shadow transition-all hover:shadow-md">
       <div className="relative h-44 w-full bg-gray-100 md:h-56">
         {primary || fallbackSrc ? (
           <Image
