@@ -10,18 +10,7 @@ export type CaptureOptions = {
   backgroundColor?: string | null;
 };
 
-function buildNodeFilter(excludeSelectors: string[] = []) {
-  if (excludeSelectors.length === 0) return undefined;
-
-  // html-to-image filter: true면 포함, false면 제외
-  return (node: HTMLElement) => {
-    // 자신 또는 조상 중 제외 셀렉터에 매칭되면 제외
-    for (const sel of excludeSelectors) {
-      if (node.matches?.(sel) || node.closest?.(sel)) return false;
-    }
-    return true;
-  };
-}
+// (unused legacy helper removed)
 
 export async function captureNodeToPng(
   node: HTMLElement,
@@ -75,13 +64,12 @@ export async function captureNodeToPng(
     const canvas = await html2canvas(node, {
       backgroundColor: backgroundColor === null ? null : backgroundColor,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       scale: pixelRatio,
       logging: false,
       // 제외 요소 무시
       ignoreElements: buildIgnoreElements(excludeSelectors),
-      scrollX: 0,
-      scrollY: 0,
+      // Let html2canvas use current window scroll by default
     });
 
     return canvas.toDataURL("image/png");

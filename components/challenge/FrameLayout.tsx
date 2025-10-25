@@ -77,13 +77,15 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                   style={computedStyle}
                 >
                   {slot.imageUrl ? (
-                    <Image
-                      src={slot.imageUrl}
-                      alt={`Photo slot ${slot.index}`}
-                      fill
-                      className="object-cover scale-x-[-1]"
-                      unoptimized={shouldBypassOptimization}
-                    />
+                    <div className="absolute inset-0 scale-x-[-1]">
+                      <Image
+                        src={slot.imageUrl}
+                        alt={`Photo slot ${slot.index}`}
+                        fill
+                        className="object-cover"
+                        unoptimized={shouldBypassOptimization}
+                      />
+                    </div>
                   ) : (
                     <div
                       className={`flex h-full w-full items-center justify-center text-[10px] font-medium sm:text-xs ${
