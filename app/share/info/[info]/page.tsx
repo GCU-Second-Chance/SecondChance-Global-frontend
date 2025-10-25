@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import DogProfile from "@/components/share/DogProfile";
 
-type Params = { params: { info: string } };
+// Use loose typing for Next.js dynamic params to align with Next 15's PageProps
+type Params = { params: any };
 
 export const metadata: Metadata = {
   title: "SecondChance Global - Shared Info",
