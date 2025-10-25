@@ -90,7 +90,9 @@ export default function QuickStats() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="mb-2 text-xl font-bold text-gray-900 md:text-2xl">Quick Stats</h2>
-          <p className="text-sm text-gray-600 md:text-base">Estimates vary by region and reporting.</p>
+          <p className="text-sm text-gray-600 md:text-base">
+            Estimates vary by region and reporting.
+          </p>
         </motion.div>
 
         {/* Featured Stat Card */}
@@ -113,9 +115,9 @@ export default function QuickStats() {
           <div className="flex-shrink-0">
             <motion.div
               className="h-12 w-12 overflow-hidden rounded-2xl md:h-16 md:w-16"
-              initial={{ backgroundColor: '#e5e7eb' }}
-              animate={{ backgroundColor: featuredProgress > 0 ? '#ffe1da' : '#e5e7eb' }}
-              transition={{ duration: 1.0, ease: 'easeOut' }}
+              initial={{ backgroundColor: "#e5e7eb" }}
+              animate={{ backgroundColor: featuredProgress > 0 ? "#ffe1da" : "#e5e7eb" }}
+              transition={{ duration: 1.0, ease: "easeOut" }}
             >
               <div className="flex h-full items-center justify-center text-2xl md:text-3xl">📊</div>
             </motion.div>
@@ -126,7 +128,7 @@ export default function QuickStats() {
                 <CountUpAnimation
                   end={STRAY_DOGS_WORLDWIDE}
                   suffix="+"
-                  className="leading-none text-5xl font-extrabold tracking-tight text-gray-900 md:text-6xl lg:text-7xl"
+                  className="leading-none text-4xl font-extrabold tracking-tight text-gray-900 md:text-6xl lg:text-7xl"
                   onProgress={setFeaturedProgress}
                 />
                 <span className="text-sm font-semibold text-gray-700 md:text-base lg:text-lg">
@@ -140,7 +142,6 @@ export default function QuickStats() {
           {/* Sparkles for hopeful tone */}
           {Array.from({ length: 3 }).map((_, i) => (
             <motion.div
-              // eslint-disable-next-line react/no-array-index-key
               key={i}
               className="pointer-events-none absolute h-2 w-2 rounded-full bg-white/70"
               style={{ top: `${20 + i * 18}%`, left: `${58 + i * 10}%` }}

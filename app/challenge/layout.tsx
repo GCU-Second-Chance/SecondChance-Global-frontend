@@ -6,7 +6,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useChallengeStore } from "@/stores";
 
@@ -46,6 +46,7 @@ const STEP_CONFIG: StepConfig[] = [
 
 export default function ChallengeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { step, reset, previousStep } = useChallengeStore();
 
   const stepConfig = useMemo(
@@ -70,16 +71,18 @@ export default function ChallengeLayout({ children }: { children: React.ReactNod
   }, [step]);
 
   const handleBack = () => {
-    if (step > 1) {
-      const targetStep = (step - 1) as 1 | 2 | 3 | 4;
-      previousStep();
-      const targetRoute =
-        STEP_CONFIG.find((config) => config.step === targetStep)?.path || "/challenge";
-      router.push(targetRoute);
-    } else {
+    // If we are at the entry page or step 1, go home
+    if (step <= 1 || pathname === "/challenge") {
       reset();
-      router.push("/challenge");
+      router.push("/");
+      return;
     }
+
+    // Otherwise move to previous step route
+    const targetStep = (step - 1) as 1 | 2 | 3 | 4;
+    previousStep();
+    const targetRoute = STEP_CONFIG.find((config) => config.step === targetStep)?.path || "/challenge";
+    router.push(targetRoute);
   };
 
   const handleReset = () => {
