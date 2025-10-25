@@ -11,7 +11,10 @@ import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white px-4 min-h-screen flex justify-center items-center py-6 md:py-12">
+    <section className="relative overflow-hidden min-h-screen flex justify-center items-center px-4 py-6 md:py-12 bg-gradient-to-b from-[#fff7f5] via-white to-white">
+      {/* Decorative background blobs */}
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#ffe1da] opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 top-1/3 h-72 w-72 rounded-full bg-[#ffd4d4] opacity-50 blur-3xl" />
       <div className="container mx-auto max-w-md md:max-w-2xl">
         {/* Hero Image with Animation */}
         {/* <motion.div
@@ -34,18 +37,17 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Find Your New Best Friend
+          Every Share is a Second Chance
         </motion.h1>
 
         {/* Subtitle with Delay */}
         <motion.p
-          className="mb-6 text-center text-sm text-gray-600 md:mb-8 md:text-base"
+          className="mb-6 text-center text-sm text-gray-700 md:mb-8 md:text-base"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          Discover dogs in need of loving homes. Our global platform connects you with shelters
-          worldwide.
+          Build a global culture of adoption. Discover and share rescue dogs from shelters across the world.
         </motion.p>
 
         {/* CTA Buttons with Stagger */}
@@ -60,9 +62,9 @@ export default function HeroSection() {
               Start Challenge
             </button>
           </Link>
-          <Link href="/challenge" className="w-full">
-            <button className="w-full rounded-full bg-[#ffd4d4] px-6 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-[#ffc4c4] md:py-3.5 md:text-base">
-              Learn More
+          <Link href="#discover" className="w-full">
+            <button className="w-full rounded-full bg-white/80 backdrop-blur px-6 py-3 text-sm font-semibold text-gray-900 ring-1 ring-gray-200 transition-all hover:bg-white md:py-3.5 md:text-base">
+              Discover Dogs
             </button>
           </Link>
         </motion.div>

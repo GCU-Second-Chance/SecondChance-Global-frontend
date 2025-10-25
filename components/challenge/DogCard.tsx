@@ -53,7 +53,9 @@ export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardP
       <div className="p-6">
         {/* Name and Age */}
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">{dog.name}</h2>
+          <h2 className="truncate text-2xl font-bold text-gray-900" title={dog.name}>
+            {dog.name}
+          </h2>
           <p className="text-sm text-gray-600">
             {ageDisplay} • {genderDisplay}
           </p>

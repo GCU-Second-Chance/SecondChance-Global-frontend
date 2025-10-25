@@ -27,11 +27,14 @@ export function buildKoreanInfoPayload(dog: Dog): string {
   const info = {
     id: dog.id,
     name: dog.name,
+    images: dog.images,
     location: dog.location,
     shelter: dog.shelter,
     breed: dog.breed,
     gender: dog.gender,
     age: dog.age,
+    createdAt: dog.createdAt,
+    origin: dog.origin,
   };
   const json = JSON.stringify(info);
   // base64url encode to be URL path safe

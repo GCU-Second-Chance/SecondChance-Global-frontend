@@ -264,23 +264,34 @@ export async function fetchDogs(options: FetchDogsOptions = {}): Promise<DogList
  */
 export async function fetchDogById(id: string, country?: string): Promise<Dog> {
   const baseUrl = getApiBaseUrl();
-  const endpoint = `${baseUrl}/api/v1/dogs/`;
   const candidateCountries = country ? [country] : [...DEFAULT_COUNTRY_CANDIDATES];
+
+  // 1) Preferred: path param + query (?country=...)
+  for (const candidate of candidateCountries) {
+    const url = `${baseUrl}/api/v1/dogs/${encodeURIComponent(id)}?country=${encodeURIComponent(candidate)}`;
+    try {
+      const payload = await fetcher<unknown>(url, { method: "GET" });
+      const dogs = normalizeDogPayload(payload);
+      if (dogs.length > 0) return dogs[0]!;
+    } catch (error) {
+      console.warn(`[fetchDogById] Path style failed for country "${candidate}":`, error);
+    }
+  }
+
+  // 2) Fallback: legacy GET with JSON body to /api/v1/dogs/
+  const legacyEndpoint = `${baseUrl}/api/v1/dogs/`;
   const numericId = Number(id);
   const idPayload = Number.isNaN(numericId) ? id : numericId;
-
   for (const candidate of candidateCountries) {
     try {
-      const payload = await fetcher<unknown>(endpoint, {
+      const payload = await fetcher<unknown>(legacyEndpoint, {
         method: "GET",
         body: JSON.stringify({ country: candidate, id: idPayload }),
       });
       const dogs = normalizeDogPayload(payload);
-      if (dogs.length > 0) {
-        return dogs[0]!;
-      }
+      if (dogs.length > 0) return dogs[0]!;
     } catch (error) {
-      console.warn(`[fetchDogById] Attempt with country "${candidate}" failed:`, error);
+      console.warn(`[fetchDogById] Legacy style failed for country "${candidate}":`, error);
     }
   }
 

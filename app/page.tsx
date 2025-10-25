@@ -3,11 +3,11 @@
  * Main entry point for SecondChance Global
  */
 
-import FeaturedDogs from "@/components/landing/FeaturedDogs";
 import HeroSection from "@/components/landing/HeroSection";
 import HowItWorks from "@/components/landing/HowItWorks";
 import QuickStats from "@/components/landing/QuickStats";
-import SuccessStories from "@/components/landing/SuccessStories";
+import Vision from "@/components/landing/Vision";
+import RandomDogs from "@/components/landing/RandomDogs";
 
 export default function Home() {
   return (
@@ -15,17 +15,17 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
+      {/* Vision */}
+      <Vision />
+
       {/* Quick Stats */}
       <QuickStats />
 
       {/* How It Works */}
       <HowItWorks />
 
-      {/* Success Stories */}
-      <SuccessStories />
-
-      {/* Featured Dogs */}
-      <FeaturedDogs />
+      {/* Random Dogs */}
+      <RandomDogs />
     </div>
   );
 }

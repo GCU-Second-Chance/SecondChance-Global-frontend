@@ -5,7 +5,7 @@ import type { Dog } from "@/stores/types";
 import { ChevronLeft, ChevronRight, Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCards } from "swiper/modules";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import "swiper/css";
 import "swiper/css/effect-cards";
@@ -31,6 +31,7 @@ export default function DogCarousel({
 }: DogCarouselProps) {
   const swiperRef = useRef<any>(null);
   const syncingRef = useRef(false);
+  const lastIndexRef = useRef<number>(activeIndex ?? 0);
 
   // Keep Swiper in sync with parent-provided activeIndex
   useEffect(() => {
@@ -39,10 +40,11 @@ export default function DogCarousel({
       // Guard against feedback loop: mark as syncing while we imperatively update Swiper
       syncingRef.current = true;
       swiper.slideTo(activeIndex, 0);
-      // Release the lock on next tick after Swiper processes the change
-      setTimeout(() => {
+      // Release the lock after Swiper applies the change
+      requestAnimationFrame(() => {
         syncingRef.current = false;
-      }, 0);
+        lastIndexRef.current = activeIndex;
+      });
     }
   }, [activeIndex]);
 
@@ -56,13 +58,13 @@ export default function DogCarousel({
         grabCursor
         modules={[EffectCards]}
         cardsEffect={{ slideShadows: false }}
-        onSlideNextTransitionEnd={() => {
+        onSlideChange={(swiper) => {
           if (syncingRef.current) return;
-          onNext();
-        }}
-        onSlidePrevTransitionEnd={() => {
-          if (syncingRef.current) return;
-          onPrevious();
+          const nextIdx = typeof swiper.activeIndex === "number" ? swiper.activeIndex : 0;
+          const prevIdx = lastIndexRef.current ?? 0;
+          if (nextIdx > prevIdx) onNext();
+          else if (nextIdx < prevIdx) onPrevious();
+          lastIndexRef.current = nextIdx;
         }}
         initialSlide={activeIndex}
       >
@@ -122,6 +124,21 @@ function DogSlide({
   onSelect: () => void;
   disableActions?: boolean;
 }) {
+  // Prefer the last available image but gracefully fall back to earlier ones if it fails to load
+  const candidates = useMemo(() => {
+    const imgs = Array.isArray(dog.images) ? dog.images : [];
+    const cleaned = imgs.filter((s): s is string => typeof s === "string" && s.trim().length > 0);
+    // last-first order (higher index tends to be higher quality)
+    return cleaned.reverse();
+  }, [dog.images]);
+
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  useEffect(() => {
+    // reset when dog changes
+    setCandidateIndex(0);
+  }, [candidates.length, dog.id]);
+
+  const primaryImage = candidates[candidateIndex] || "/placeholder-dog.jpg";
   const ageDisplay =
     typeof dog.age === "number" ? `${dog.age} year${dog.age === 1 ? "" : "s"}` : String(dog.age);
   const genderDisplay =
@@ -135,12 +152,17 @@ function DogSlide({
     >
       <div className="relative h-1/2 w-full overflow-hidden bg-gray-100">
         <Image
-          src={dog.images[0] || "/placeholder-dog.jpg"}
+          src={primaryImage}
           alt={dog.name}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 80vw, 320px"
           priority={isCurrent}
+          unoptimized
+          onError={() => {
+            // Try next candidate if current fails
+            setCandidateIndex((i) => (i + 1 < candidates.length ? i + 1 : i));
+          }}
         />
         <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow">
           #{dog.id.replace("dog_", "")}
@@ -149,7 +171,9 @@ function DogSlide({
 
       <div className="flex flex-1 flex-col px-6 py-5">
         <div className="mb-3">
-          <h3 className="text-2xl font-semibold text-gray-900">{dog.name}</h3>
+          <h3 className="truncate text-2xl font-semibold text-gray-900" title={dog.name}>
+            {dog.name}
+          </h3>
           <p className="text-sm text-gray-600">
             {ageDisplay} • {genderDisplay}
           </p>

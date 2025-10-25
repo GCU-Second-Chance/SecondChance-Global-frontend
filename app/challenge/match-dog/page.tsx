@@ -159,6 +159,7 @@ export default function MatchDogPage() {
         ) : visible.length > 0 ? (
           <div className="relative">
             <DogCarousel
+              key={windowStart}
               dogs={visible}
               activeIndex={activeIndex}
               onNext={handleNext}
