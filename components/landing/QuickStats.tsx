@@ -57,7 +57,7 @@ function CountUpAnimation({
     animationFrame = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationFrame);
-  }, [end, duration, isInView]);
+  }, [end, duration, isInView, onProgress]);
 
   return (
     <div ref={ref} className={className ?? "text-4xl font-bold text-gray-900 md:text-5xl"}>

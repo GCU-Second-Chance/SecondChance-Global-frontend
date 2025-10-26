@@ -14,21 +14,18 @@ import { Calendar, Heart, Mail, MapPin, Phone, Share2, Sparkles } from "lucide-r
 import { getDogById } from "@/data/dogs";
 import type { Dog } from "@/stores/types";
 import { logChallengeConversion, logDogShared, logQRScanned } from "@/lib/analytics";
+import { englishAge, englishLocation } from "@/lib/utils/englishize";
 
 function getAgeDisplay(age: Dog["age"]): string {
-  if (typeof age === "number") {
-    return `${age} year${age === 1 ? "" : "s"} old`;
-  }
-
-  return String(age);
+  return typeof age === "number" ? englishAge(age) : englishAge(String(age ?? ""));
 }
 
 function getAgeDescriptor(age: Dog["age"]): string {
-  if (typeof age === "number") {
-    return `${age}-year-old`;
-  }
-
-  return `${String(age).toLowerCase()}`;
+  if (typeof age === "number") return `${age}-year-old`;
+  const s = String(age ?? "");
+  const m = s.match(/Born in\s*(\d{4})/i);
+  if (m) return `Born in ${m[1]}`;
+  return s.toLowerCase();
 }
 
 interface DogDetailPageProps {
@@ -66,10 +63,17 @@ export default function DogDetailPage({ params }: DogDetailPageProps) {
 
     const url = window.location.href;
     const ageDescriptor = getAgeDescriptor(dog.age);
+    const loc = englishLocation(
+      dog.location.city,
+      dog.location.country,
+      (dog as any).location?.province
+    );
+    const shelterName =
+      dog.shelter.name && !/^unknown/i.test(dog.shelter.name) ? dog.shelter.name : "Local Shelter";
     const shareText = `🐾 Meet ${dog.name}! This ${ageDescriptor} rescue dog is looking for a loving home.
 
-📍 ${dog.location.city}, ${dog.location.country}
-🏠 ${dog.shelter.name}
+📍 ${loc}
+🏠 ${shelterName}
 
 Help ${dog.name} find their forever home! #SecondChanceGlobal #AdoptDontShop`;
 
@@ -232,7 +236,11 @@ Help ${dog.name} find their forever home! #SecondChanceGlobal #AdoptDontShop`;
               <span className="font-semibold text-gray-900">Location</span>
             </div>
             <p className="text-gray-700">
-              {dog.location.city}, {dog.location.country}
+              {englishLocation(
+                dog.location.city,
+                dog.location.country,
+                (dog as any).location?.province
+              )}
             </p>
           </div>
 

@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       "images.unsplash.com",
       "dl5zpyw5k3jeb.cloudfront.net",
       "dbw3zep4prcju.cloudfront.net",
+      "openapi.animal.go.kr",
     ],
   },
 };

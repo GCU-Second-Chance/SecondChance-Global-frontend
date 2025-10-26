@@ -1,8 +1,13 @@
 import type { Dog } from "@/stores/types";
+import { englishLocation } from "@/lib/utils/englishize";
 
 export function buildShareText(dog: Dog): string {
   const name = dog.name || "this rescue";
-  const location = `${dog.location.city}, ${dog.location.country}`;
+  const location = englishLocation(
+    dog.location.city,
+    dog.location.country,
+    (dog as any).location?.province
+  );
   const shelterRaw = dog.shelter?.name?.trim();
   const contactRaw = dog.shelter?.contact?.trim();
 
@@ -25,7 +30,11 @@ export function buildShareText(dog: Dog): string {
 // Base info only (no hashtags) — used when inserting Fortune-of-the-day
 export function buildShareTextBase(dog: Dog): string {
   const name = dog.name || "this rescue";
-  const location = `${dog.location.city}, ${dog.location.country}`;
+  const location = englishLocation(
+    dog.location.city,
+    dog.location.country,
+    (dog as any).location?.province
+  );
   const shelterRaw = dog.shelter?.name?.trim();
   const contactRaw = dog.shelter?.contact?.trim();
 

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { useDogBatch } from "@/lib/react-query/hooks";
 import type { Dog } from "@/stores/types";
 import { buildShareUrl } from "@/lib/utils/share";
+import { englishLocation } from "@/lib/utils/englishize";
 
 function pickPrimaryImage(images: string[]): string | null {
   const cleaned = (Array.isArray(images) ? images : []).filter(
@@ -49,7 +50,7 @@ function DogCard({ dog }: { dog: Dog }) {
           {dog.name}
         </h3>
         <div className="text-xs text-gray-600 md:text-sm">
-          {dog.location.city}, {dog.location.country}
+          {englishLocation(dog.location.city, dog.location.country, (dog as any).location?.province)}
         </div>
       </div>
     </Link>

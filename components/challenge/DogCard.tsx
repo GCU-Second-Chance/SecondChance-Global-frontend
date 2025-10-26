@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import type { Dog } from "@/stores/types";
 import { Calendar, Heart, MapPin } from "lucide-react";
+import { englishAge, englishLocation } from "@/lib/utils/englishize";
 
 interface DogCardProps {
   dog: Dog;
@@ -18,10 +19,7 @@ interface DogCardProps {
 }
 
 export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardProps) {
-  const ageDisplay =
-    typeof dog.age === "number"
-      ? `${dog.age} year${dog.age === 1 ? "" : "s"} old`
-      : dog.age;
+  const ageDisplay = typeof dog.age === "number" ? englishAge(dog.age) : englishAge(String(dog.age ?? ""));
   const genderDisplay =
     dog.gender === "male" ? "Male" : dog.gender === "female" ? "Female" : "Unknown";
 
@@ -83,7 +81,7 @@ export default function DogCard({ dog, onSelect, onReroll, isLoading }: DogCardP
         <div className="mb-4 flex items-center gap-2">
           <MapPin className="h-4 w-4 text-gray-500" />
           <span className="text-sm text-gray-700">
-            {dog.location.city}, {dog.location.country}
+            {englishLocation(dog.location.city, dog.location.country, (dog as any).location?.province)}
           </span>
         </div>
 

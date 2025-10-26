@@ -12,6 +12,7 @@ import { Download, Share2 } from "lucide-react";
 import { useChallengeStore } from "@/stores";
 import FrameLayoutResult from "@/components/challenge/FrameLayoutResult";
 import { buildShareTextBase } from "@/lib/utils/share";
+import { englishLocation } from "@/lib/utils/englishize";
 import { logResultDownloaded, logShareCompleted } from "@/lib/analytics";
 
 export default function ResultPage() {
@@ -122,12 +123,21 @@ export default function ResultPage() {
       const shareUrl = `${window.location.origin}/dog/${matchedDog.id}`;
 
       // Share text
+      const loc = englishLocation(
+        matchedDog.location.city,
+        matchedDog.location.country,
+        (matchedDog as any).location?.province
+      );
+      const shelterName =
+        matchedDog.shelter.name && !/^unknown/i.test(matchedDog.shelter.name)
+          ? matchedDog.shelter.name
+          : "Local Shelter";
       const shareText = `🐾 ${matchedDog.name} is looking for a forever home!
 
 Help this rescue dog find their second chance 💛
 
-📍 ${matchedDog.location.city}, ${matchedDog.location.country}
-🏠 ${matchedDog.shelter.name}
+📍 ${loc}
+🏠 ${shelterName}
 
 #SecondChanceGlobal #AdoptDontShop #${matchedDog.name}
 

@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import DogGallery from "@/components/share/DogGallery";
+import { englishAge, englishLocation } from "@/lib/utils/englishize";
 
 type LocationLike = { country?: string; city?: string } | undefined;
 type ShelterLike = { name?: string; contact?: string; email?: string } | undefined;
@@ -25,6 +26,7 @@ export default function DogProfile({ dog, showHome = true }: DogProfileProps) {
   const title = dog?.name || "Rescue Dog";
   const city = dog?.location?.city || "Unknown";
   const country = dog?.location?.country || "Unknown";
+  const province = (dog?.location as any)?.province as string | undefined;
   const shelterName = dog?.shelter?.name;
   const contact = dog?.shelter?.contact;
   const email = dog?.shelter?.email;
@@ -45,7 +47,7 @@ export default function DogProfile({ dog, showHome = true }: DogProfileProps) {
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
             <p className="text-gray-700">
-              {city}, {country}
+              {englishLocation(city, country, province)}
             </p>
           </div>
 
@@ -64,7 +66,7 @@ export default function DogProfile({ dog, showHome = true }: DogProfileProps) {
             )}
             {typeof dog.age !== "undefined" && (
               <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
-                <span className="font-semibold text-gray-900">Age:</span> {String(dog.age)}
+                <span className="font-semibold text-gray-900">Age:</span> {typeof dog.age === "number" ? englishAge(dog.age) : englishAge(String(dog.age ?? ""))}
               </div>
             )}
           </div>
@@ -86,4 +88,3 @@ export default function DogProfile({ dog, showHome = true }: DogProfileProps) {
     </div>
   );
 }
-

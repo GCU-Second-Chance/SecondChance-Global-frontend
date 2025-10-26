@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Heart, MapPin } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCards } from "swiper/modules";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { englishAge, englishLocation } from "@/lib/utils/englishize";
 
 import "swiper/css";
 import "swiper/css/effect-cards";
@@ -146,8 +147,7 @@ function DogSlide({
   }, [candidates.length, dog.id]);
 
   const primaryImage = candidates[candidateIndex] || "/placeholder-dog.jpg";
-  const ageDisplay =
-    typeof dog.age === "number" ? `${dog.age} year${dog.age === 1 ? "" : "s"}` : String(dog.age);
+  const ageDisplay = typeof dog.age === "number" ? englishAge(dog.age) : englishAge(String(dog.age ?? ""));
   const genderDisplay =
     dog.gender === "male" ? "Male" : dog.gender === "female" ? "Female" : "Unknown";
 
@@ -196,7 +196,7 @@ function DogSlide({
         <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
           <MapPin className="h-4 w-4 text-gray-400" />
           <span>
-            {dog.location.city}, {dog.location.country}
+            {englishLocation(dog.location.city, dog.location.country, (dog as any).location?.province)}
           </span>
         </div>
 
