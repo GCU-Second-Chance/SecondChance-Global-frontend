@@ -120,7 +120,9 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
                   style={computedStyle}
                 >
                   {slot.imageUrl && (
-                    <div className={`absolute inset-0 ${slot.type === "user" ? "scale-x-[-1]" : ""}`}>
+                    <div
+                      className={`absolute inset-0 ${slot.type === "user" ? "scale-x-[-1]" : ""}`}
+                    >
                       <Image
                         src={slot.imageUrl}
                         alt={`Photo slot ${slot.index}`}
@@ -150,24 +152,26 @@ const FrameLayoutResult = forwardRef<HTMLDivElement, FrameLayoutProps>(
           {/* Info + QR overlays (above frame) */}
           {showOverlays && (
             <div className="absolute inset-0 z-30 pointer-events-none select-none">
+              {/* Bottom overlay band sized relative to frame: 90px of 600px => 15% */}
               <div
-                className="absolute left-0 right-0 bottom-0 flex items-end gap-2 px-2 pb-2"
+                className="absolute left-0 right-0 bottom-0 flex items-end gap-2 px-2 pb-2 "
                 style={bandStyle}
               >
                 {matchedDog && (
                   <div
                     className="pointer-events-auto flex-1 overflow-hidden rounded p-1 "
-                    style={{ color: textColor, backgroundColor: bgColor }}
+                    style={{ color: textColor }}
                   >
                     <div
                       className={`whitespace-pre-line break-words hyphens-auto ${
-                        isNarrow ? "text-[8px]" : "text-[10px] "
-                      } leading-snug tracking-tight ${isFortune ? "font-semibold" : ""}`}
+                        isNarrow ? "text-[7px]" : "text-[9px] "
+                      } leading-tight tracking-tight ${isFortune ? "font-semibold" : ""}`}
                     >
                       {isFortune ? `🔮 ${displayText}` : displayText}
                     </div>
                   </div>
                 )}
+
                 {qrDataUrl && (
                   <div
                     className="pointer-events-auto rounded p-[1.5px]"
