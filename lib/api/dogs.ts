@@ -74,19 +74,17 @@ function normalizeAge(rawAge: string | number | null | undefined): {
 }
 
 function normalizeGender(rawGender: string | null | undefined): Dog["gender"] {
-  if (!rawGender) {
-    return "unknown";
-  }
+  if (!rawGender) return "unknown";
 
-  const normalized = rawGender.trim().toLowerCase();
+  const g = rawGender.trim().toLowerCase();
 
-  if (normalized === "male") {
-    return "male";
-  }
+  // Common inputs
+  if (g === "male" || g === "m" || g.startsWith("남") || g.includes("수컷")) return "male";
+  if (g === "female" || g === "f" || g === "q" || g.startsWith("여") || g.includes("암컷")) return "female";
 
-  if (normalized === "female") {
-    return "female";
-  }
+  // Some feeds use single letters for states we can't infer reliably
+  // 'n' often means neutered (not a gender) — treat as unknown here
+  if (g === "n" || g === "u" || g === "x") return "unknown";
 
   return "unknown";
 }
@@ -95,10 +93,13 @@ function mapGihoeDog(apiDog: GihoeApiDog): Dog {
   const { age, range } = normalizeAge(apiDog.Age ?? null);
   const images = Array.isArray(apiDog.Images) ? apiDog.Images.filter(Boolean) : [];
 
+  const rawName = apiDog.Name?.trim() || "";
+  const normalizedName = rawName === "빈값" || rawName.length === 0 ? "Please name me" : rawName;
+
   return {
     id: String(apiDog.ID),
     images,
-    name: apiDog.Name?.trim() || "Unnamed",
+    name: normalizedName,
     age,
     ageRange: range,
     gender: normalizeGender(apiDog.Gender ?? null),
