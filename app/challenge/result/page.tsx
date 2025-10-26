@@ -263,7 +263,9 @@ Help this rescue dog find their second chance 💛
           {/* Fortune of the day */}
           <div className="rounded-xl border border-gray-200 bg-white p-4 text-center">
             <p className="mb-2 text-sm font-medium text-gray-800">Fortune of the day</p>
-            <div className="mb-3 text-xs text-gray-500">{fortuneLeft !== null ? `Tries left: ${fortuneLeft}/3` : ``}</div>
+            <div className="mb-3 text-xs text-gray-500">
+              {fortuneLeft !== null ? `Tries left: ${fortuneLeft}/3` : ``}
+            </div>
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={handleFortune}
@@ -318,14 +320,10 @@ Help this rescue dog find their second chance 💛
           <p className="mb-4 text-center text-sm text-gray-700">
             Every share increases the chance of {matchedDog.name} finding a loving home.
           </p>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-[#ff6b5a]">1</div>
+              <div className="text-2xl font-bold text-[#ff6b5a]">0</div>
               <div className="text-xs text-gray-600">Dog Helped</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-[#ff6b5a]">4</div>
-              <div className="text-xs text-gray-600">Photos Shared</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-[#ff6b5a]">∞</div>
