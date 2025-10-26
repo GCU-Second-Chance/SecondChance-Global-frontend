@@ -1,6 +1,19 @@
 import type { Dog } from "@/stores/types";
 import { englishLocation } from "@/lib/utils/englishize";
 
+function base64urlEncodeUnicode(input: string): string {
+  if (typeof window === "undefined") {
+    // Node: UTF-8 safe + base64url
+    return Buffer.from(input, "utf8").toString("base64url");
+  }
+  // Browser: TextEncoder to UTF-8 bytes, then btoa on binary string
+  const bytes = new TextEncoder().encode(input);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]!);
+  const b64 = btoa(binary);
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
 export function buildShareText(dog: Dog): string {
   const name = dog.name || "this rescue";
   const location = englishLocation(
@@ -69,10 +82,7 @@ export function buildKoreanInfoPayload(dog: Dog): string {
   };
   const json = JSON.stringify(info);
   // base64url encode to be URL path safe
-  const b64 =
-    typeof window === "undefined"
-      ? Buffer.from(json).toString("base64url")
-      : btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  const b64 = base64urlEncodeUnicode(json);
   return b64;
 }
 
