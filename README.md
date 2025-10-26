@@ -71,6 +71,7 @@ Open http://localhost:3000 in your browser.
 ## 🚀 Deployment
 
 This project is deployed on [Vercel](https://vercel.com).
+URL : https://www.gihoe.site
 
 ### Deploy to Vercel
 
