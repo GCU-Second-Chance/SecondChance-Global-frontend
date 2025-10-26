@@ -127,7 +127,7 @@ const FrameLayout = forwardRef<HTMLDivElement, FrameLayoutProps>(
                   style={computedStyle}
                 >
                   {slot.imageUrl ? (
-                    <div className="absolute inset-0 scale-x-[-1]">
+                    <div className={`absolute inset-0 ${slot.type === "user" ? "scale-x-[-1]" : ""}`}>
                       <Image
                         src={slot.imageUrl}
                         alt={`Photo slot ${slot.index}`}
