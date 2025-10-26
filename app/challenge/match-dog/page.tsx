@@ -200,10 +200,6 @@ export default function MatchDogPage() {
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex gap-2">
             <span className="text-[#ff6b5a]">•</span>
-            <span>Swipe through up to 10 at a time. After 30, reload for a new set.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-[#ff6b5a]">•</span>
             <span>We&apos;ll help you craft a shareable frame that features them beautifully.</span>
           </li>
           <li className="flex gap-2">
