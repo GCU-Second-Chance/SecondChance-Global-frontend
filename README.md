@@ -1,20 +1,26 @@
-# SecondChance Global Frontend
+# SecondChance Global — Frontend
 
-> 유기견 정보의 글로벌 공유를 통한 국제 입양 촉진 프로젝트
+> Every Share is a Second Chance. Create a 4-cut story with QR and share it globally to boost rescue dog adoptions.
 
-## 🚀 Tech Stack
+## 🚀 Overview & Tech
 
-- **Framework**: Next.js 15.5.6 (App Router)
-- **React**: 19.2.0
-- **TypeScript**: 5.x
-- **Styling**: Tailwind CSS 4.x
-- **Animation**: Framer Motion
-- **State Management**: Zustand
-- **Data Fetching**: React Query
-- **i18n**: react-i18next
-- **Analytics**: Google Analytics 4
+SecondChance Global is a mobile-first web app that turns empathy into action:
 
-## 📋 Prerequisites
+- Create a 4-cut “challenge” image (frame + photos + info band + QR)
+- QR links to the dog’s profile (share pages or ID-based route)
+- Social-first UX: quick matching, instant preview, Web Share API
+- English-first display: Korean age/location are auto-Englishized
+
+Tech stack:
+
+- Framework: Next.js 15 (App Router)
+- React 19, TypeScript 5
+- Styling: Tailwind CSS 4, Framer Motion
+- State/Data: Zustand, @tanstack/react-query 5
+- i18n: react-i18next
+- Analytics: GA4 (gtag) and/or Google Tag Manager
+
+## 📋 Requirements
 
 - Node.js >= 18.0.0
 - npm >= 9.0.0
@@ -42,14 +48,17 @@ Copy `.env.example` to `.env.local` and fill in the required values:
 cp .env.example .env.local
 ```
 
-**Required Environment Variables:**
+Common variables:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | API Base URL | `http://localhost:3001/api` |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics Measurement ID | `G-XXXXXXXXXX` |
-| `NEXT_PUBLIC_GTM_ID` | Google Tag Manager Container ID | `GTM-XXXXXXX` |
-| `GCP_TRANSLATION_API_KEY` | GCP Translation API Key (optional) | - |
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | API base (e.g., `http://localhost:3001/api`) |
+| `NEXT_PUBLIC_GTM_ID` | Google Tag Manager container ID (optional) |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 Measurement ID (optional) |
+| `NEXT_PUBLIC_ENABLE_RQ_DEVTOOLS` | `true` to enable React Query Devtools (optional) |
+| `GEMINI_API_KEY` | AI transform route (experimental) (optional) |
+| `SCG_RATE_SECRET` | Cookie signing for “Fortune of the day” and simple rate-limits (optional) |
+| `GCP_TRANSLATION_API_KEY` | For optional translation workflows (optional) |
 
 ### 4. Run the development server
 
@@ -57,9 +66,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-## � Deployment
+## 🚀 Deployment
 
 This project is deployed on [Vercel](https://vercel.com).
 
@@ -76,15 +85,14 @@ This project is deployed on [Vercel](https://vercel.com).
    ```
 
 3. **Configure Environment Variables in Vercel Dashboard**
-   - `NEXT_PUBLIC_API_URL` - Backend API URL
-   - `NEXT_PUBLIC_GA_MEASUREMENT_ID` - Google Analytics ID
+   - `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_GTM_ID` and/or `NEXT_PUBLIC_GA_MEASUREMENT_ID`
 
 ### Automatic Deployments
 
 - **Production**: Commits to `main` branch
 - **Preview**: Pull requests
 
-## �📜 Available Scripts
+## 📜 Available Scripts
 
 ```bash
 npm run dev          # Start development server
@@ -101,18 +109,31 @@ npm run type-check   # TypeScript type checking
 
 ```
 .
-├── app/                 # Next.js App Router pages
-├── components/          # React components
-│   └── layout/         # Layout components (Header, Footer, Container)
-├── lib/                 # Utility functions
-│   ├── analytics/      # Google Analytics utilities
-│   ├── api/            # API fetcher and error handling
-│   ├── i18n/           # Internationalization config
-│   ├── motion/         # Framer Motion presets
-│   └── react-query/    # React Query configuration
-├── stores/              # Zustand stores
-├── public/              # Static assets
-└── AGENTS.md            # Project specifications
+├── app/
+│  ├── (main)/layout.tsx            # Main layout
+│  ├── page.tsx                     # Landing (Hero, Quick Stats, Random Dogs)
+│  ├── challenge/
+│  │  ├── select-frame/page.tsx     # Step 1
+│  │  ├── match-dog/page.tsx        # Step 2 (10-card window + Rematch/Reload)
+│  │  ├── upload-photos/page.tsx    # Step 3 (upload/camera)
+│  │  └── result/page.tsx           # Step 4 (result + share)
+│  └── share/
+│     ├── id/[id]/page.tsx          # Share-by-ID
+│     └── info/[info]/page.tsx      # Share-by-encoded payload
+├── components/
+│  ├── challenge/                   # Carousel, cards, frame layouts
+│  ├── landing/                     # Hero, Quick Stats, Random Dogs
+│  └── layout/                      # Header, Footer, Container
+├── lib/
+│  ├── api/                         # fetcher, errors, dogs.ts
+│  ├── analytics/                   # gtag wrapper + typed logger
+│  ├── i18n/                        # react-i18next config/provider
+│  ├── motion/                      # framer-motion presets
+│  ├── react-query/                 # client + provider
+│  └── utils/                       # capture, qr, share, englishize, frame-overlay
+├── stores/                         # Zustand store (challenge flow)
+├── data/                           # Mock data (dogs, frames)
+└── public/                         # Static assets
 ```
 
 ## 🌍 Supported Languages
@@ -122,9 +143,9 @@ npm run type-check   # TypeScript type checking
 - 日本語 (Japanese)
 - 中文简体 (Chinese Simplified)
 
-## 📊 Analytics Events
+## 📊 Analytics
 
-The application tracks the following custom events:
+Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` for GA4, or `NEXT_PUBLIC_GTM_ID` for GTM. Typed wrappers live in `lib/analytics/logger.ts`; event types in `lib/analytics/events.ts`. Key events:
 
 **Challenge Flow:**
 - `dog_matched` - When a dog is matched with a user
@@ -146,7 +167,29 @@ The application tracks the following custom events:
 - `photo_uploaded` - Photo upload method tracking
 - `result_downloaded` - Result image download
 
-See `lib/analytics/events.ts` for complete event definitions.
+Remote image domains are whitelisted in `next.config.ts` for `next/image`.
+
+## 🧭 Flow & UX Notes
+
+- Matching: 10 cards per window via carousel; Rematch shows next 10; after 30, Reload fetches a new batch.
+- Englishization: Korean age/location are converted to English (`lib/utils/englishize.ts`). Gyeonggi-do cities are mapped and generic cleanup applies.
+- Photos: Only user photos are mirrored; dog photos stay unflipped. Mirroring is preserved by html2canvas via `onclone` patch (`lib/utils/capture.ts`).
+- Sharing: Web Share API with fallback to link copy. Share URLs use `/share/id/[id]` or `/share/info/[info]` (Unicode-safe base64url).
+
+## 🧩 API Summary
+
+- `GET /api/v1/dogs/random` → batch; client slices for carousel windows
+- `GET /api/v1/dogs/:id` (path-first; legacy body fallback supported)
+- `POST /api/v1/challenge/:id/upload` (mocked upload; 48h expiry simulation)
+
+Normalization & fallbacks: see `lib/api/dogs.ts`.
+
+## 🧪 Tips & Troubleshooting
+
+- Web Share not supported → link copy fallback appears.
+- Unicode payloads → handled with Unicode-safe base64url (no `btoa` issues).
+- React Query Devtools → enable with `NEXT_PUBLIC_ENABLE_RQ_DEVTOOLS=true`.
+- Capture mirroring missing → ensure user slots have `scale-x-[-1]` class.
 
 ## 🤝 Contributing
 
@@ -158,4 +201,4 @@ This project is private and proprietary.
 
 ---
 
-**Team Gi-hoe (기회)** - Giving second chances to rescue dogs worldwide 🐾
+**Team Gi-hoe (기회)** — Giving second chances to rescue dogs worldwide 🐾

@@ -37,7 +37,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Every Share is a Second Chance
+          Giving Dogs a Second Chance
         </motion.h1>
 
         {/* Subtitle with Delay */}
@@ -47,7 +47,8 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          Build a global culture of adoption. Discover and share rescue dogs from shelters across the world.
+          Build a global culture of adoption. Discover and share rescue dogs from shelters across
+          the world.
         </motion.p>
 
         {/* CTA Buttons with Stagger */}
